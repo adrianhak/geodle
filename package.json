@@ -10,8 +10,12 @@
     "@types/node": "^16.11.38",
     "@types/react": "^18.0.10",
     "@types/react-dom": "^18.0.5",
+    "axios": "^0.27.2",
+    "geolib": "^3.3.3",
     "react": "^18.1.0",
+    "react-autosuggest": "^10.1.0",
     "react-dom": "^18.1.0",
+    "react-feather": "^2.0.10",
     "react-scripts": "5.0.1",
     "typescript": "^4.7.2",
     "web-vitals": "^2.1.4"
@@ -20,13 +24,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "browserslist": {
     "production": [
@@ -39,5 +40,15 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-autosuggest": "^10.1.5",
+    "autoprefixer": "^10.4.7",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.30.0",
+    "postcss": "^8.4.14",
+    "tailwindcss": "^3.0.24"
   }
 }
