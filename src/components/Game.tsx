@@ -1,17 +1,25 @@
 import React, { useState, useEffect, FormEvent } from 'react';
+import { Pagination } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import './swiper-style.css';
 import { ILocation } from '../@types/Location';
 import { locations } from '../locations';
 import { useGameServer } from '../services/GameServer';
 import { useGameState } from '../services/GameState';
 import { GuessInput } from './GuessInput';
 import { GuessRow } from './GuessRow';
+import { blobToBase64 } from '../util/blobToBase64';
 
 const Game = () => {
   const gameStateContext = useGameState();
   const gameServer = useGameServer();
 
+  const [swiper, setSwiper] = useState<any>(null);
   const [currentGuess, setCurrentGuess] = useState<string>('');
-  const [satImage, setSatImage] = useState<string>('');
+  const [satImages, setSatImages] = useState<string[]>([]);
 
   // Return location object matching the current guess string, or null if no match, duplicate or max count reached
   const validateGuess = (guess: string): ILocation | null => {
@@ -66,6 +74,10 @@ const Game = () => {
   };
 
   useEffect(() => {
+    const storedImages = localStorage.getItem('satImages');
+    if (storedImages) {
+      setSatImages(JSON.parse(storedImages));
+    }
     gameServer!.getGameRound().then((gameRound) => {
       gameStateContext.addRound(gameRound);
     }); // TODO: Add error handling and check if game round is already in state
@@ -75,20 +87,30 @@ const Game = () => {
   // Each time a guess is added, fetch a new satellite image
   useEffect(() => {
     const currentGame = gameStateContext.getCurrentGame();
-    if (currentGame) {
+    if (
+      currentGame && // Only fetch when game is initialized
+      currentGame.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
+      currentGame.guesses.length === satImages.length // and if the latest image is not already in the array
+    ) {
       gameServer!
-        .getSatImage(
-          Math.min(
-            gameStateContext.getCurrentGame()!.guesses.length,
-            gameStateContext.maxGuesses - 1
-          ),
-          false
-        )
+        .getSatImage(currentGame.guesses.length, false)
         .then((satImage) => {
-          setSatImage(satImage);
+          blobToBase64(satImage).then((satImageBase64) => {
+            setSatImages((satImages) => [...satImages, satImageBase64]);
+          });
         });
     }
-  }, [gameServer, gameStateContext]);
+  }, [gameServer, gameStateContext, satImages]);
+
+  useEffect(() => {
+    if (swiper) {
+      // Slide to latest image when new one is fetched
+      swiper.slideTo(satImages.length - 1);
+    }
+    if (satImages.length > 0) {
+      localStorage.setItem('satImages', JSON.stringify(satImages));
+    }
+  }, [satImages, swiper]);
 
   const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map(
     (index) => {
@@ -102,14 +124,26 @@ const Game = () => {
   );
 
   return (
-    <div className='game m-auto mt-8 w-full'>
-      <img
-        src={satImage}
-        alt='Satellite'
-        className='object-fit w-full md:w-7/12 h-72 m-auto'
-      />
+    <div className='game m-auto mt-8 w-full md:w-8/12'>
+      <Swiper
+        onSwiper={(swiper) => setSwiper(swiper)}
+        slidesPerView={1}
+        modules={[Pagination]}
+        pagination={{
+          clickable: true,
+        }}>
+        {satImages.map((satImage, index) => (
+          <SwiperSlide key={index}>
+            <img
+              src={satImage}
+              alt='Satellite'
+              className='object-fit w-full m-auto h-72'
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-      <div className='text-black'>
+      <div className='text-black mt-6'>
         {guessRows}
         <form onSubmit={handleGuessSubmission}>
           <GuessInput

@@ -8,5 +8,5 @@ export interface IGameRound {
 export interface GameRoundContextType {
   getGameRound: () => Promise<IGameRound>;
   sendGuess: (guessCount: number, guess: string) => Promise<IGuess>;
-  getSatImage: (guessCount: number, show_labels: boolean) => Promise<string>;
+  getSatImage: (guessCount: number, show_labels: boolean) => Promise<Blob>;
 }

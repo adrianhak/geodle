@@ -56,15 +56,13 @@ const getSatImage = async (
   guessCount: number,
   show_labels: boolean
 ): Promise<string> => {
-  return URL.createObjectURL(
-    (
-      await axios.get(
-        (process.env.REACT_APP_SERVER_ENDPOINT + 'fetchimage/') as string,
-        {
-          params: { n: guessCount, ...(show_labels ? { l: show_labels } : {}) },
-          responseType: 'blob',
-        }
-      )
-    ).data
-  );
+  return (
+    await axios.get(
+      (process.env.REACT_APP_SERVER_ENDPOINT + 'fetchimage/') as string,
+      {
+        params: { n: guessCount, ...(show_labels ? { l: show_labels } : {}) },
+        responseType: 'blob',
+      }
+    )
+  ).data;
 };
