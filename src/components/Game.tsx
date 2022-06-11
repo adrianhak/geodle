@@ -1,4 +1,10 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, {
+  useState,
+  useEffect,
+  FormEvent,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import { Pagination } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -16,10 +22,20 @@ import { blobToBase64 } from '../util/blobToBase64';
 const Game = () => {
   const gameStateContext = useGameState();
   const gameServer = useGameServer();
+  const setGame = useRef(gameStateContext.setGame);
+  const saveGame = useRef(gameStateContext.saveGame);
+  const currentGame = useRef(gameStateContext.currentGame);
 
   const [swiper, setSwiper] = useState<any>(null);
   const [currentGuess, setCurrentGuess] = useState<string>('');
-  const [satImages, setSatImages] = useState<string[]>([]);
+  const [satImages, setSatImages] = useState<string[] | null>(null);
+
+  // Return true if <24 hours have passed since the date provided by the game round (according to local time)
+  const validateGameRoundDate = (date: string) => {
+    const gameRoundDate = new Date(date);
+    const now = new Date();
+    return now.getTime() - gameRoundDate.getTime() < 60 * 60 * 24 * 1000;
+  };
 
   // Return location object matching the current guess string, or null if no match, duplicate or max count reached
   const validateGuess = (guess: string): ILocation | null => {
@@ -29,9 +45,9 @@ const Game = () => {
     );
     if (
       !location ||
-      gameStateContext
-        .getCurrentGame()
-        ?.guesses.find((guess) => guess.locationCode === location.code)
+      gameStateContext.currentGame?.guesses.find(
+        (guess) => guess.locationCode === location.code
+      )
     ) {
       return null;
     }
@@ -41,12 +57,12 @@ const Game = () => {
   // Compute a Guess object from a location name. Called when the user submits a guess.
   const handleGuessSubmission = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (gameStateContext.getCurrentGame()) {
+    if (gameStateContext.currentGame) {
       // Validate the guess and create a Guess object
       const guessedLocation: ILocation | null = validateGuess(currentGuess);
       if (
         !guessedLocation ||
-        gameStateContext.getCurrentGame()!.guesses.length >=
+        gameStateContext.currentGame?.guesses.length >=
           gameStateContext.maxGuesses
       ) {
         console.error('Invalid guess: %s', currentGuess);
@@ -55,14 +71,11 @@ const Game = () => {
       }
       gameServer
         ?.sendGuess(
-          gameStateContext.getCurrentGame()!.guesses.length,
+          gameStateContext.currentGame?.guesses.length,
           guessedLocation.code
         )
         .then((guessResponse: any) => {
-          gameStateContext.addGuess(
-            gameStateContext.getCurrentGame()!,
-            guessResponse.guess
-          );
+          gameStateContext.addGuess(guessResponse.guess);
           // Game is finished, either by winning or running out of guesses
           if (guessResponse.isDone) {
             console.log(guessResponse.gameRound);
@@ -73,58 +86,81 @@ const Game = () => {
     }
   };
 
+  useLayoutEffect(() => {
+    currentGame.current = gameStateContext.currentGame;
+  }, [gameStateContext.currentGame]);
+
+  // Initial load of game state
   useEffect(() => {
-    const storedImages = localStorage.getItem('satImages');
-    if (storedImages) {
-      setSatImages(JSON.parse(storedImages));
+    // Ignore initial empty state and completed state
+    if (currentGame.current === null) {
+      return;
     }
-    gameServer!.getGameRound().then((gameRound) => {
-      gameStateContext.addRound(gameRound);
-    }); // TODO: Add error handling and check if game round is already in state
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // If there exists a current and ongoing game, load any previous images and do nothing else
+    if (validateGameRoundDate(currentGame.current?.gameRound.date)) {
+      const storedImages = localStorage.getItem('satImages');
+      setSatImages(storedImages ? JSON.parse(storedImages) : []);
+      return;
+    }
+    // Else, ask the server for a new game round
+    gameServer?.getGameRound().then((gameRound) => {
+      setGame.current(gameRound);
+      setSatImages([]);
+    }); // TODO: Add error handling
+  }, [gameServer, gameStateContext.currentGame?.gameRound]);
 
   // Each time a guess is added, fetch a new satellite image
   useEffect(() => {
-    const currentGame = gameStateContext.getCurrentGame();
     if (
-      currentGame && // Only fetch when game is initialized
-      currentGame.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
-      currentGame.guesses.length === satImages.length // and if the latest image is not already in the array
+      currentGame.current && // Only fetch when game is initialized
+      currentGame.current.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
+      currentGame.current.guesses.length === satImages?.length // and if the latest image is not already in the array
     ) {
-      gameServer!
-        .getSatImage(currentGame.guesses.length, false)
+      gameServer
+        ?.getSatImage(currentGame.current.guesses.length, false)
         .then((satImage) => {
           blobToBase64(satImage).then((satImageBase64) => {
-            setSatImages((satImages) => [...satImages, satImageBase64]);
+            setSatImages((satImages) =>
+              satImages ? [...satImages, satImageBase64] : [satImageBase64]
+            );
           });
         });
     }
-  }, [gameServer, gameStateContext, satImages]);
+  }, [
+    gameServer,
+    gameStateContext.maxGuesses,
+    satImages?.length,
+    gameStateContext.currentGame?.guesses.length,
+  ]);
 
+  // Slide to the new image and save it to local storage
   useEffect(() => {
-    if (swiper) {
+    if (swiper && satImages) {
       // Slide to latest image when new one is fetched
       swiper.slideTo(satImages.length - 1);
     }
-    if (satImages.length > 0) {
+    if (satImages && satImages.length > 0) {
       localStorage.setItem('satImages', JSON.stringify(satImages));
     }
   }, [satImages, swiper]);
 
+  // Save game to list of previous games when completed
+  useEffect(() => {
+    if (currentGame.current?.isCompleted) {
+      saveGame.current(currentGame.current);
+    }
+  }, [gameStateContext.currentGame?.isCompleted]);
+
   const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map(
     (index) => {
       return (
-        <GuessRow
-          key={index}
-          guess={gameStateContext.getCurrentGame()?.guesses[index]}
-        />
+        <GuessRow key={index} guess={currentGame.current?.guesses[index]} />
       );
     }
   );
 
   return (
-    <div className='game m-auto mt-8 w-full md:w-8/12'>
+    <div className='game m-auto mt-4 w-full md:w-8/12'>
       <Swiper
         onSwiper={(swiper) => setSwiper(swiper)}
         slidesPerView={1}
@@ -132,7 +168,7 @@ const Game = () => {
         pagination={{
           clickable: true,
         }}>
-        {satImages.map((satImage, index) => (
+        {satImages?.map((satImage, index) => (
           <SwiperSlide key={index}>
             <img
               src={satImage}

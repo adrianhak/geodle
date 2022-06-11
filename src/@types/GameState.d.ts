@@ -5,9 +5,10 @@ export interface IGameState {
 }
 
 export interface GameStateContextType {
-  gameStates: IGameState[];
+  prevGames: IGameState[] | null;
+  currentGame: IGameState | null;
   maxGuesses: number;
-  getCurrentGame: () => IGameState | undefined;
-  addRound: (gameRound: IGameRound) => void;
-  addGuess: (gameState: IGameState, guess: IGuess) => void;
+  setGame: (gameRound: IGameRound) => void;
+  saveGame: (game: IGameState) => void;
+  addGuess: (guess: IGuess) => void;
 }

@@ -6,11 +6,12 @@ import { IGuess } from '../@types/Guess';
 const { createContext, useContext } = React;
 
 export const InitialGameStateContext: GameStateContextType = {
-  gameStates: [],
+  prevGames: null,
+  currentGame: null,
   maxGuesses: 6,
-  getCurrentGame: () => undefined,
-  addRound: (gameRound: IGameRound) => undefined, // Placeholder
-  addGuess: (gameState: IGameState, guess: IGuess) => undefined,
+  setGame: (gameRound: IGameRound) => undefined, // Placeholder
+  addGuess: (guess: IGuess) => undefined,
+  saveGame: (game: IGameState) => undefined,
 };
 
 const GameStateContext = createContext<GameStateContextType>(
@@ -19,12 +20,12 @@ const GameStateContext = createContext<GameStateContextType>(
 
 export const GameStateProvider = (props: any) => {
   const value = {
-    gameStates: props.gameStates || InitialGameStateContext.gameStates,
+    prevGames: props.prevGames || InitialGameStateContext.prevGames,
+    currentGame: props.currentGame || InitialGameStateContext.currentGame,
     maxGuesses: props.maxGuesses || InitialGameStateContext.maxGuesses,
-    getCurrentGame:
-      props.getCurrentGame || InitialGameStateContext.getCurrentGame,
-    addRound: props.addRound || InitialGameStateContext.addRound,
+    setGame: props.setGame || InitialGameStateContext.setGame,
     addGuess: props.addGuess || InitialGameStateContext.addGuess,
+    saveGame: props.saveGame || InitialGameStateContext.saveGame,
   };
 
   return (
