@@ -18,6 +18,8 @@ import { useGameState } from '../services/GameState';
 import { GuessInput } from './GuessInput';
 import { GuessRow } from './GuessRow';
 import { blobToBase64 } from '../util/blobToBase64';
+import { Share } from './Share';
+import moment from 'moment';
 
 const Game = () => {
   const gameStateContext = useGameState();
@@ -32,9 +34,12 @@ const Game = () => {
 
   // Return true if <24 hours have passed since the date provided by the game round (according to local time)
   const validateGameRoundDate = (date: string) => {
-    const gameRoundDate = new Date(date);
-    const now = new Date();
-    return now.getTime() - gameRoundDate.getTime() < 60 * 60 * 24 * 1000;
+    if (!date) {
+      return false;
+    }
+    const gameRoundDate = moment.utc(date);
+    const now = moment.utc();
+    return now.valueOf() - gameRoundDate.valueOf() < 60 * 60 * 24 * 1000;
   };
 
   // Return location object matching the current guess string, or null if no match, duplicate or max count reached
@@ -57,23 +62,20 @@ const Game = () => {
   // Compute a Guess object from a location name. Called when the user submits a guess.
   const handleGuessSubmission = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (gameStateContext.currentGame) {
+    // Only allow guesses if gameround was fetched correctly
+    if (currentGame.current?.gameRound.id) {
       // Validate the guess and create a Guess object
       const guessedLocation: ILocation | null = validateGuess(currentGuess);
       if (
         !guessedLocation ||
-        gameStateContext.currentGame?.guesses.length >=
-          gameStateContext.maxGuesses
+        currentGame.current?.guesses.length >= gameStateContext.maxGuesses
       ) {
         console.error('Invalid guess: %s', currentGuess);
         return;
         // TODO: Show error message
       }
       gameServer
-        ?.sendGuess(
-          gameStateContext.currentGame?.guesses.length,
-          guessedLocation.code
-        )
+        ?.sendGuess(currentGame.current?.guesses.length, guessedLocation.code)
         .then((guessResponse: any) => {
           gameStateContext.addGuess(guessResponse.guess);
           // Game is finished, either by winning or running out of guesses
@@ -105,6 +107,7 @@ const Game = () => {
     // Else, ask the server for a new game round
     gameServer?.getGameRound().then((gameRound) => {
       setGame.current(gameRound);
+      localStorage.setItem('satImages', '[]');
       setSatImages([]);
     }); // TODO: Add error handling
   }, [gameServer, gameStateContext.currentGame?.gameRound]);
@@ -112,7 +115,8 @@ const Game = () => {
   // Each time a guess is added, fetch a new satellite image
   useEffect(() => {
     if (
-      currentGame.current && // Only fetch when game is initialized
+      currentGame.current &&
+      currentGame.current.isCompleted === false && // Only fetch when game is initialized and in progress
       currentGame.current.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
       currentGame.current.guesses.length === satImages?.length // and if the latest image is not already in the array
     ) {
@@ -181,17 +185,21 @@ const Game = () => {
 
       <div className='text-black mt-6'>
         {guessRows}
-        <form onSubmit={handleGuessSubmission}>
-          <GuessInput
-            currentGuess={currentGuess}
-            setCurrentGuess={setCurrentGuess}
-          />
-          <button
-            type='submit'
-            className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>
-            GUESS
-          </button>
-        </form>
+        {currentGame.current?.isCompleted === true ? (
+          <Share />
+        ) : (
+          <form onSubmit={handleGuessSubmission}>
+            <GuessInput
+              currentGuess={currentGuess}
+              setCurrentGuess={setCurrentGuess}
+            />
+            <button
+              type='submit'
+              className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>
+              GUESS
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

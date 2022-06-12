@@ -7,6 +7,7 @@ import { GameStateProvider } from './services/GameState';
 import { IGameState } from './@types/GameState';
 import { IGameRound } from './@types/GameRound';
 import { IGuess } from './@types/Guess';
+import { Slide, ToastContainer, Zoom } from 'react-toastify';
 
 function App() {
   const [prevGames, setPrevGames] = useState<IGameState[] | null>(null);
@@ -75,6 +76,14 @@ function App() {
   return (
     <div className='App text-neutral-900 dark:text-white text-center bg-neutral-100 dark:bg-neutral-900 w-full h-screen'>
       <div className='m-auto max-w-2xl flex flex-col h-full'>
+        <ToastContainer
+          position='top-center'
+          autoClose={2000}
+          transition={Slide}
+          toastClassName='font-bold'
+          bodyClassName='text-neutral-700'
+          hideProgressBar={true}
+        />
         <Navbar></Navbar>
         <GameStateProvider
           prevGames={prevGames}
