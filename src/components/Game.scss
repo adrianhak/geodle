@@ -1,0 +1,4 @@
+/* Needed for page modals to correctly overlay the image */
+.swiper {
+    z-index: 0;
+}

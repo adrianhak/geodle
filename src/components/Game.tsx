@@ -21,6 +21,8 @@ import { blobToBase64 } from '../util/blobToBase64';
 import { Share } from './Share';
 import moment from 'moment';
 
+import './Game.scss';
+
 const Game = () => {
   const gameStateContext = useGameState();
   const gameServer = useGameServer();
