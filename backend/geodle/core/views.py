@@ -1,5 +1,4 @@
 from datetime import datetime
-import time
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.core.serializers import serialize
 from geodle.core.services import getSatImage
@@ -25,7 +24,7 @@ def guess(request):
         return HttpResponseNotFound()
     if guessedCode == gameRound.answer or guessCount >= MAX_GUESSES-1:
         # TODO: Include global stats as well
-        return JsonResponse({'isDone':True, 'guess':{'locationCode': guessedCode, 'distance': 0}, 'gameRound': FullGameRoundSerializer(gameRound).data})
+        return JsonResponse({'isDone':True, 'guess':{'locationCode': guessedCode, 'distance': gameRound.distance_to_answer(guessedCode)}, 'gameRound': FullGameRoundSerializer(gameRound).data})
     else:
         return JsonResponse({'guess':{'locationCode': guessedCode, 'distance': gameRound.distance_to_answer(guessedCode)}})
 
