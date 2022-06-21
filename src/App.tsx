@@ -46,10 +46,6 @@ function App() {
   };
 
   useLayoutEffect(() => {
-    // Load previously stored game states
-    const storedState = localStorage.getItem('prevGames');
-    setPrevGames(storedState ? JSON.parse(storedState) : []);
-
     // Load current game state
     const storedCurrentGame = localStorage.getItem('currentgame');
     setCurrentGame(
@@ -57,6 +53,9 @@ function App() {
         ? JSON.parse(storedCurrentGame)
         : { gameRound: {}, guesses: [], isCompleted: false }
     );
+    // Load previously stored game states
+    const storedState = localStorage.getItem('prevGames');
+    setPrevGames(storedState ? JSON.parse(storedState) : []);
   }, []);
 
   // Write game states to local storage when changed
@@ -84,7 +83,6 @@ function App() {
           bodyClassName='text-neutral-700'
           hideProgressBar={true}
         />
-        <Navbar></Navbar>
         <GameStateProvider
           prevGames={prevGames}
           currentGame={currentGame}
@@ -92,6 +90,7 @@ function App() {
           addGuess={addGuess}
           saveGame={saveGame}>
           <GameServerProvider>
+            <Navbar></Navbar>
             <div className='px-2 flex-grow'>
               <Game></Game>
             </div>

@@ -38,17 +38,15 @@ export const Page = (props: PageProps) => {
         enter='transition-all duration-200 ease-out'
         enterFrom='transform translate-y-12 opacity-50'
         enterTo='transform translate-y-0 opacity-100'>
-        <div className='text-center flex flex-col'>
-          <div className='flex items-center justify-center'>
-            <span className='text-lg font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-300 flex-1 pl-7'>
-              {props.pageTitle}
-            </span>
-            <button onClick={props.closePage}>
-              <X className='w-7 text-neutral-400 dark:text-netural-300' />
-            </button>
-          </div>
-          {props.children}
+        <div className='flex items-center justify-center'>
+          <span className='text-lg font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-300 flex-1 pl-7 text-center'>
+            {props.pageTitle}
+          </span>
+          <button onClick={props.closePage}>
+            <X className='w-7 text-neutral-400 dark:text-netural-300' />
+          </button>
         </div>
+        {props.children}
       </Transition>
     </Modal>
   );
