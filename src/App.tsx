@@ -7,7 +7,7 @@ import { GameStateProvider } from './services/GameState';
 import { IGameState } from './@types/GameState';
 import { IGameRound } from './@types/GameRound';
 import { IGuess } from './@types/Guess';
-import { Slide, ToastContainer, Zoom } from 'react-toastify';
+import { Slide, ToastContainer } from 'react-toastify';
 
 function App() {
   const [prevGames, setPrevGames] = useState<IGameState[] | null>(null);
@@ -73,37 +73,39 @@ function App() {
   }, [currentGame]);
 
   return (
-    <div className='App text-neutral-900 dark:text-white text-center bg-neutral-100 dark:bg-neutral-900 w-full h-screen'>
-      <div className='m-auto max-w-2xl flex flex-col h-full'>
-        <ToastContainer
-          position='top-center'
-          autoClose={2000}
-          transition={Slide}
-          toastClassName='font-bold'
-          bodyClassName='text-neutral-700'
-          hideProgressBar={true}
-        />
-        <GameStateProvider
-          prevGames={prevGames}
-          currentGame={currentGame}
-          setGame={setGame}
-          addGuess={addGuess}
-          saveGame={saveGame}>
-          <GameServerProvider>
-            <Navbar></Navbar>
-            <div className='px-2 flex-grow'>
-              <Game></Game>
-            </div>
-          </GameServerProvider>
-        </GameStateProvider>
-        <footer className='mb-5 text-sm'>
-          Enjoying Geodle?{' '}
-          <a href='https://ko-fi.com/adrianhak' className='underline'>
-            Buy me a ☕️
-          </a>
-        </footer>
+    <>
+      <ToastContainer
+        position='top-center'
+        autoClose={2000}
+        transition={Slide}
+        toastClassName='font-bold'
+        bodyClassName='text-neutral-700'
+        hideProgressBar={true}
+      />
+      <div className='App min-h-full text-neutral-900 dark:text-white text-center bg-neutral-100 dark:bg-neutral-900 flex flex-auto justify-center'>
+        <div className='max-w-2xl w-full flex flex-col'>
+          <GameStateProvider
+            prevGames={prevGames}
+            currentGame={currentGame}
+            setGame={setGame}
+            addGuess={addGuess}
+            saveGame={saveGame}>
+            <GameServerProvider>
+              <Navbar></Navbar>
+              <div className='px-2 flex-grow'>
+                <Game></Game>
+              </div>
+            </GameServerProvider>
+          </GameStateProvider>
+          <footer className='mb-3 mt-3 text-sm'>
+            Enjoying Geodle?{' '}
+            <a href='https://ko-fi.com/adrianhak' className='underline'>
+              Buy me a ☕️
+            </a>
+          </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

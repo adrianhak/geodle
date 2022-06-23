@@ -185,7 +185,7 @@ const Game = () => {
         ))}
       </Swiper>
 
-      <div className='text-black mt-6'>
+      <div className='text-black mt-2'>
         {guessRows}
         {currentGame.current?.isCompleted === true ? (
           <Share />
