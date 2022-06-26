@@ -22,7 +22,7 @@ def guess(request):
     gameRound = GameRound.objects.filter(date=datetime.date(datetime.now())).first()
     if gameRound is None:
         return HttpResponseNotFound()
-    if guessedCode == gameRound.answer or guessCount >= MAX_GUESSES-1:
+    if guessedCode == gameRound.answer.id or guessCount >= MAX_GUESSES-1:
         # TODO: Include global stats as well
         return JsonResponse({'isDone':True, 'guess':{'locationCode': guessedCode, 'distance': gameRound.distance_to_answer(guessedCode)}, 'gameRound': FullGameRoundSerializer(gameRound).data})
     else:
