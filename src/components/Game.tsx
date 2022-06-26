@@ -22,10 +22,14 @@ import { Share } from './Share';
 import moment from 'moment';
 
 import './Game.scss';
+import { toast } from 'react-toastify';
+import { getCountryEmoji } from '../util/getCountryEmoji';
+import { Page, usePageContext } from '../contexts/PageContext';
 
 const Game = () => {
   const gameStateContext = useGameState();
   const gameServer = useGameServer();
+  const pageContext = usePageContext();
   const setGame = useRef(gameStateContext.setGame);
   const saveGame = useRef(gameStateContext.saveGame);
   const currentGame = useRef(gameStateContext.currentGame);
@@ -80,15 +84,34 @@ const Game = () => {
         ?.sendGuess(currentGame.current?.guesses.length, guessedLocation.code)
         .then((guessResponse: any) => {
           gameStateContext.addGuess(guessResponse.guess);
-          // Game is finished, either by winning or running out of guesses
           if (guessResponse.isDone) {
-            console.log(guessResponse.gameRound);
-            // TODO: Access gameround object and show correct answer
+            gameStateContext.setAnswer(guessResponse.gameRound.answer);
           }
         });
       setCurrentGuess('');
     }
   };
+
+  // Game is finished, either by winning or running out of guesses
+  useEffect(() => {
+    if (currentGame.current?.isCompleted) {
+      const lastGuess =
+        currentGame.current?.guesses[currentGame.current.guesses.length - 1];
+      saveGame.current(currentGame.current);
+      lastGuess.distance === 0
+        ? toast('Good job!')
+        : toast(
+            getCountryEmoji(currentGame.current.gameRound.answer) +
+              ' ' +
+              locations.find(
+                (location) =>
+                  location.code === currentGame.current?.gameRound.answer
+              )?.name
+          );
+      setTimeout(() => pageContext.show(Page.Statistics), 1500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGame.current?.isCompleted]);
 
   useLayoutEffect(() => {
     currentGame.current = gameStateContext.currentGame;
@@ -149,13 +172,6 @@ const Game = () => {
       localStorage.setItem('satImages', JSON.stringify(satImages));
     }
   }, [satImages, swiper]);
-
-  // Save game to list of previous games when completed
-  useEffect(() => {
-    if (currentGame.current?.isCompleted) {
-      saveGame.current(currentGame.current);
-    }
-  }, [gameStateContext.currentGame?.isCompleted]);
 
   const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map(
     (index) => {

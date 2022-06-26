@@ -3,6 +3,7 @@ import IGuess from './IGuess';
 export interface IGameRound {
   date: Date;
   id: number;
+  answer?: string;
 }
 
 export interface GameRoundContextType {

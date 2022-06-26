@@ -10,6 +10,7 @@ export const InitialGameStateContext: GameStateContextType = {
   currentGame: null,
   maxGuesses: 6,
   setGame: (gameRound: IGameRound) => undefined, // Placeholder
+  setAnswer: (answer: string) => undefined,
   addGuess: (guess: IGuess) => undefined,
   saveGame: (game: IGameState) => undefined,
 };
@@ -24,6 +25,7 @@ export const GameStateProvider = (props: any) => {
     currentGame: props.currentGame || InitialGameStateContext.currentGame,
     maxGuesses: props.maxGuesses || InitialGameStateContext.maxGuesses,
     setGame: props.setGame || InitialGameStateContext.setGame,
+    setAnswer: props.setAnswer || InitialGameStateContext.setAnswer,
     addGuess: props.addGuess || InitialGameStateContext.addGuess,
     saveGame: props.saveGame || InitialGameStateContext.saveGame,
   };

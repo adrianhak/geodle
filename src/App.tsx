@@ -46,6 +46,18 @@ function App() {
     });
   };
 
+  const setAnswer = (answer: string) => {
+    setCurrentGame((gameState) => {
+      if (gameState) {
+        return {
+          ...gameState,
+          gameRound: { ...gameState.gameRound, answer },
+        };
+      }
+      return gameState;
+    });
+  };
+
   useLayoutEffect(() => {
     // Load current game state
     const storedCurrentGame = localStorage.getItem('currentgame');
@@ -90,6 +102,7 @@ function App() {
               prevGames={prevGames}
               currentGame={currentGame}
               setGame={setGame}
+              setAnswer={setAnswer}
               addGuess={addGuess}
               saveGame={saveGame}>
               <GameServerProvider>
