@@ -15,9 +15,7 @@ export const InitialGameStateContext: GameStateContextType = {
   saveGame: (game: IGameState) => undefined,
 };
 
-const GameStateContext = createContext<GameStateContextType>(
-  InitialGameStateContext
-);
+const GameStateContext = createContext<GameStateContextType>(InitialGameStateContext);
 
 export const GameStateProvider = (props: any) => {
   const value = {
@@ -30,11 +28,7 @@ export const GameStateProvider = (props: any) => {
     saveGame: props.saveGame || InitialGameStateContext.saveGame,
   };
 
-  return (
-    <GameStateContext.Provider value={value}>
-      {props.children}
-    </GameStateContext.Provider>
-  );
+  return <GameStateContext.Provider value={value}>{props.children}</GameStateContext.Provider>;
 };
 
 export const useGameState = () => {

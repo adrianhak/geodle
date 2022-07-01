@@ -36,9 +36,7 @@ function App() {
   const saveGame = (game: IGameState) => {
     setPrevGames((prevGames) => {
       if (prevGames) {
-        return prevGames.find(
-          (prevGame) => prevGame.gameRound.id === game.gameRound.id
-        )
+        return prevGames.find((prevGame) => prevGame.gameRound.id === game.gameRound.id)
           ? prevGames
           : prevGames.concat([game]);
       }

@@ -6,13 +6,11 @@ interface DonatePageProps {
   close: () => void;
 }
 
-export const DonatePage = (props: DonatePageProps) => {
-  return (
-    <Page
-      showPage={props.isOpen}
-      closePage={props.close}
-      pageTitle='Support Geodle'>
+export const DonatePage = (props: DonatePageProps) => (
+  <Page showPage={props.isOpen} closePage={props.close} pageTitle='Support Geodle'>
+    <div className='w-2/3 m-auto text-xs'>
       <span></span>
-    </Page>
-  );
-};
+      <iframe className='w-full' src='/kofibutton.html' title='ko-fi'></iframe>
+    </div>
+  </Page>
+);

@@ -19,15 +19,13 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const prevGames = gameStateContext.prevGames;
 
   const [currentTab, setCurrentTab] = useState(Tab.Stats);
-  const setStatsTab = () =>
-    setCurrentTab(props.initialTab ? props.initialTab : Tab.Stats);
+  const setStatsTab = () => setCurrentTab(props.initialTab ? props.initialTab : Tab.Stats);
   const setHistoryTab = () => setCurrentTab(Tab.History);
 
   const playCount = prevGames?.length;
   const winRate = prevGames
-    ? prevGames?.filter((game) =>
-        game?.guesses?.some((guess) => guess.distance === 0)
-      ).length / prevGames?.length
+    ? prevGames?.filter((game) => game?.guesses?.some((guess) => guess.distance === 0)).length /
+      prevGames?.length
     : 0;
 
   const getLongestStreak = (): number => {
@@ -79,9 +77,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
       <span
         style={{
           flex: `0 1 ${Math.round(
-            (guessDistribution.filter((g) => g === i + 1).length /
-              guessDistribution.length) *
-              100
+            (guessDistribution.filter((g) => g === i + 1).length / guessDistribution.length) * 100
           )}%`,
         }}
         className={`bg-neutral-500 my-0.5 text-right px-1 font-bold text-white text-xs`}>

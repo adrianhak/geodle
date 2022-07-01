@@ -14,11 +14,7 @@ export const GameServerProvider = (props: any) => {
     getSatImage: props.getSatImage || getSatImage,
   };
 
-  return (
-    <GameServerContext.Provider value={value}>
-      {props.children}
-    </GameServerContext.Provider>
-  );
+  return <GameServerContext.Provider value={value}>{props.children}</GameServerContext.Provider>;
 };
 
 export const useGameServer = () => {
@@ -28,41 +24,26 @@ export const useGameServer = () => {
 // API implementation
 const getGameRound = async (): Promise<IGameRound> => {
   return (
-    await axios.get(
-      (process.env.REACT_APP_SERVER_ENDPOINT + 'play/') as string,
-      {
-        headers: { Accept: 'application/json' },
-      }
-    )
+    await axios.get((process.env.REACT_APP_SERVER_ENDPOINT + 'play/') as string, {
+      headers: { Accept: 'application/json' },
+    })
   ).data.gameRound;
 };
 
-const sendGuess = async (
-  guessCount: number,
-  guessedCode: string
-): Promise<IGuess> => {
+const sendGuess = async (guessCount: number, guessedCode: string): Promise<IGuess> => {
   return (
-    await axios.get(
-      (process.env.REACT_APP_SERVER_ENDPOINT + 'guess/') as string,
-      {
-        params: { n: guessCount, c: guessedCode },
-        headers: { Accept: 'application/json' },
-      }
-    )
+    await axios.get((process.env.REACT_APP_SERVER_ENDPOINT + 'guess/') as string, {
+      params: { n: guessCount, c: guessedCode },
+      headers: { Accept: 'application/json' },
+    })
   ).data;
 };
 
-const getSatImage = async (
-  guessCount: number,
-  show_labels: boolean
-): Promise<string> => {
+const getSatImage = async (guessCount: number, show_labels: boolean): Promise<string> => {
   return (
-    await axios.get(
-      (process.env.REACT_APP_SERVER_ENDPOINT + 'fetchimage/') as string,
-      {
-        params: { n: guessCount, ...(show_labels ? { l: show_labels } : {}) },
-        responseType: 'blob',
-      }
-    )
+    await axios.get((process.env.REACT_APP_SERVER_ENDPOINT + 'fetchimage/') as string, {
+      params: { n: guessCount, ...(show_labels ? { l: show_labels } : {}) },
+      responseType: 'blob',
+    })
   ).data;
 };

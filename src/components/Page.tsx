@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { X } from 'react-feather';
 import Modal from 'react-modal';
 

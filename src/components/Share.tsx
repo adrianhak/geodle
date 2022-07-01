@@ -25,10 +25,8 @@ export const Share = () => {
       else if (guess.distance < 4000) resultText += '🟩'.repeat(2);
       else if (guess.distance < 5000) resultText += '🟩';
       resultText +=
-        '⬜️'.repeat(
-          5 -
-            resultText.split('\n')[resultText.split('\n').length - 1].length / 2
-        ) + '\n'; // Pad with empty squares (/2 since 🟩 is 2 chars)
+        '⬜️'.repeat(5 - resultText.split('\n')[resultText.split('\n').length - 1].length / 2) +
+        '\n'; // Pad with empty squares (/2 since 🟩 is 2 chars)
     });
     resultText += '🔗 https://geodle.adrianh.net\n';
     return resultText;
@@ -36,9 +34,7 @@ export const Share = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setMomentDiff(
-        moment.utc(gameState?.gameRound.date).add(1, 'd').diff(moment.utc())
-      );
+      setMomentDiff(moment.utc(gameState?.gameRound.date).add(1, 'd').diff(moment.utc()));
     }, 1000);
 
     return () => {

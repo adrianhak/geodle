@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BarChart2, Heart, Info, Settings } from 'react-feather';
 import { Page, usePageContext } from '../contexts/PageContext';
 import { DonatePage } from './DonatePage';
@@ -19,9 +18,7 @@ const Navbar = () => {
           size={24}
           className='transition-transform ease-in-out hover:fill-red-700 duration-300 hover:text-red-700 hover:scale-125'></Heart>
       </button>
-      <h1 className='flex-auto font-notoserifDisplay text-3xl tracking-wider'>
-        Geodle
-      </h1>
+      <h1 className='flex-auto font-notoserifDisplay text-3xl tracking-wider'>Geodle</h1>
       <button className='ml-5' onClick={() => show(Page.Statistics)}>
         <BarChart2 size={24} />
       </button>
@@ -33,14 +30,8 @@ const Navbar = () => {
 
       <InfoPage isOpen={open && currentPage === Page.Info} close={close} />
       <DonatePage isOpen={open && currentPage === Page.Support} close={close} />
-      <StatisticsPage
-        isOpen={open && currentPage === Page.Statistics}
-        close={close}
-      />
-      <SettingsPage
-        isOpen={open && currentPage === Page.Settings}
-        close={close}
-      />
+      <StatisticsPage isOpen={open && currentPage === Page.Statistics} close={close} />
+      <SettingsPage isOpen={open && currentPage === Page.Settings} close={close} />
     </div>
   );
 };

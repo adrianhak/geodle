@@ -9,10 +9,7 @@ interface GuessInputProps {
   setCurrentGuess: (guess: string) => void;
 }
 
-export const GuessInput = ({
-  currentGuess,
-  setCurrentGuess,
-}: GuessInputProps) => {
+export const GuessInput = ({ currentGuess, setCurrentGuess }: GuessInputProps) => {
   const [suggestions, setSuggestions] = useState<ILocation[]>([]);
 
   const onValueChange = (event: any, { newValue }: any) => {
@@ -24,9 +21,7 @@ export const GuessInput = ({
     return inputValue.length === 0
       ? []
       : locations.filter(
-          (location) =>
-            location.name.toLowerCase().slice(0, inputValue.length) ===
-            inputValue
+          (location) => location.name.toLowerCase().slice(0, inputValue.length) === inputValue
         );
   };
 

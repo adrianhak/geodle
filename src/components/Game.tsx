@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  FormEvent,
-  useRef,
-  useLayoutEffect,
-} from 'react';
+import React, { useState, useEffect, FormEvent, useRef, useLayoutEffect } from 'react';
 import { Pagination } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -51,14 +45,10 @@ const Game = () => {
   // Return location object matching the current guess string, or null if no match, duplicate or max count reached
   const validateGuess = (guess: string): ILocation | null => {
     guess = guess.toLowerCase();
-    const location = locations.find(
-      (location) => location.name.toLowerCase() === guess
-    );
+    const location = locations.find((location) => location.name.toLowerCase() === guess);
     if (
       !location ||
-      gameStateContext.currentGame?.guesses.find(
-        (guess) => guess.locationCode === location.code
-      )
+      gameStateContext.currentGame?.guesses.find((guess) => guess.locationCode === location.code)
     ) {
       return null;
     }
@@ -72,10 +62,7 @@ const Game = () => {
     if (currentGame.current?.gameRound.id) {
       // Validate the guess and create a Guess object
       const guessedLocation: ILocation | null = validateGuess(currentGuess);
-      if (
-        !guessedLocation ||
-        currentGame.current?.guesses.length >= gameStateContext.maxGuesses
-      ) {
+      if (!guessedLocation || currentGame.current?.guesses.length >= gameStateContext.maxGuesses) {
         console.error('Invalid guess: %s', currentGuess);
         return;
         // TODO: Show error message
@@ -95,18 +82,15 @@ const Game = () => {
   // Game is finished, either by winning or running out of guesses
   useEffect(() => {
     if (currentGame.current?.isCompleted) {
-      const lastGuess =
-        currentGame.current?.guesses[currentGame.current.guesses.length - 1];
+      const lastGuess = currentGame.current?.guesses[currentGame.current.guesses.length - 1];
       saveGame.current(currentGame.current);
       lastGuess.distance === 0
         ? toast('Good job!')
         : toast(
             getCountryEmoji(currentGame.current.gameRound.answer) +
               ' ' +
-              locations.find(
-                (location) =>
-                  location.code === currentGame.current?.gameRound.answer
-              )?.name
+              locations.find((location) => location.code === currentGame.current?.gameRound.answer)
+                ?.name
           );
       setTimeout(() => pageContext.show(Page.Statistics), 1500);
     }
@@ -145,15 +129,13 @@ const Game = () => {
       currentGame.current.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
       currentGame.current.guesses.length === satImages?.length // and if the latest image is not already in the array
     ) {
-      gameServer
-        ?.getSatImage(currentGame.current.guesses.length, false)
-        .then((satImage) => {
-          blobToBase64(satImage).then((satImageBase64) => {
-            setSatImages((satImages) =>
-              satImages ? [...satImages, satImageBase64] : [satImageBase64]
-            );
-          });
+      gameServer?.getSatImage(currentGame.current.guesses.length, false).then((satImage) => {
+        blobToBase64(satImage).then((satImageBase64) => {
+          setSatImages((satImages) =>
+            satImages ? [...satImages, satImageBase64] : [satImageBase64]
+          );
         });
+      });
     }
   }, [
     gameServer,
@@ -173,13 +155,9 @@ const Game = () => {
     }
   }, [satImages, swiper]);
 
-  const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map(
-    (index) => {
-      return (
-        <GuessRow key={index} guess={currentGame.current?.guesses[index]} />
-      );
-    }
-  );
+  const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map((index) => {
+    return <GuessRow key={index} guess={currentGame.current?.guesses[index]} />;
+  });
 
   return (
     <div className='game m-auto mt-4 w-full md:w-8/12'>
@@ -192,11 +170,7 @@ const Game = () => {
         }}>
         {satImages?.map((satImage, index) => (
           <SwiperSlide key={index}>
-            <img
-              src={satImage}
-              alt='Satellite'
-              className='object-fit w-full m-auto h-72'
-            />
+            <img src={satImage} alt='Satellite' className='object-fit w-full m-auto h-72' />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -207,10 +181,7 @@ const Game = () => {
           <Share />
         ) : (
           <form onSubmit={handleGuessSubmission}>
-            <GuessInput
-              currentGuess={currentGuess}
-              setCurrentGuess={setCurrentGuess}
-            />
+            <GuessInput currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} />
             <button
               type='submit'
               className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>

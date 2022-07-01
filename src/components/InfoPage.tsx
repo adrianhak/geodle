@@ -8,10 +8,7 @@ interface InfoPageProps {
 
 export const InfoPage = (props: InfoPageProps) => {
   return (
-    <Page
-      showPage={props.isOpen}
-      closePage={props.close}
-      pageTitle='How to Play'>
+    <Page showPage={props.isOpen} closePage={props.close} pageTitle='How to Play'>
       <span></span>
     </Page>
   );
