@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, FormEvent, useRef, useLayoutEffect, useCallback } from 'react';
 import { Pagination } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -79,23 +79,16 @@ const Game = () => {
     }
   };
 
-  // Game is finished, either by winning or running out of guesses
-  useEffect(() => {
-    if (currentGame.current?.isCompleted) {
-      const lastGuess = currentGame.current?.guesses[currentGame.current.guesses.length - 1];
-      saveGame.current(currentGame.current);
-      lastGuess.distance === 0
-        ? toast('Good job!')
-        : toast(
-            getCountryEmoji(currentGame.current.gameRound.answer) +
-              ' ' +
-              locations.find((location) => location.code === currentGame.current?.gameRound.answer)
-                ?.name
-          );
-      setTimeout(() => pageContext.show(Page.Statistics), 1500);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGame.current?.isCompleted]);
+  const getSatImage = useCallback(() => {
+    if (!currentGame.current) return;
+    gameServer?.getSatImage(currentGame.current.guesses.length, false).then((satImage) => {
+      blobToBase64(satImage).then((satImageBase64) => {
+        setSatImages((satImages) =>
+          satImages ? [...satImages, satImageBase64] : [satImageBase64]
+        );
+      });
+    });
+  }, [gameServer]);
 
   useLayoutEffect(() => {
     currentGame.current = gameStateContext.currentGame;
@@ -118,31 +111,32 @@ const Game = () => {
       setGame.current(gameRound);
       localStorage.setItem('satImages', '[]');
       setSatImages([]);
+      getSatImage();
     }); // TODO: Add error handling
-  }, [gameServer, gameStateContext.currentGame?.gameRound]);
+  }, [gameServer, gameStateContext.currentGame?.gameRound, getSatImage]);
 
-  // Each time a guess is added, fetch a new satellite image
-  useEffect(() => {
-    if (
-      currentGame.current &&
-      currentGame.current.isCompleted === false && // Only fetch when game is initialized and in progress
-      currentGame.current.guesses.length < gameStateContext.maxGuesses && // and when the guess limit is not reached
-      currentGame.current.guesses.length === satImages?.length // and if the latest image is not already in the array
-    ) {
-      gameServer?.getSatImage(currentGame.current.guesses.length, false).then((satImage) => {
-        blobToBase64(satImage).then((satImageBase64) => {
-          setSatImages((satImages) =>
-            satImages ? [...satImages, satImageBase64] : [satImageBase64]
+  // Guess has been made and result shown to user, fetch next sat image or end game (callback for countup end)
+  const guessDone = () => {
+    if (currentGame.current?.isCompleted) {
+      const lastGuess = currentGame.current?.guesses[currentGame.current.guesses.length - 1];
+      saveGame.current(currentGame.current);
+      lastGuess.distance === 0
+        ? toast('Good job!')
+        : toast(
+            getCountryEmoji(currentGame.current.gameRound.answer) +
+              ' ' +
+              locations.find((location) => location.code === currentGame.current?.gameRound.answer)
+                ?.name
           );
-        });
-      });
-    }
-  }, [
-    gameServer,
-    gameStateContext.maxGuesses,
-    satImages?.length,
-    gameStateContext.currentGame?.guesses.length,
-  ]);
+      setTimeout(() => pageContext.show(Page.Statistics), 1500);
+    } else if (
+      currentGame.current &&
+      currentGame.current.isCompleted === false &&
+      currentGame.current?.guesses.length < gameStateContext.maxGuesses &&
+      currentGame.current?.guesses.length === satImages?.length
+    )
+      getSatImage();
+  };
 
   // Slide to the new image and save it to local storage
   useEffect(() => {
@@ -156,7 +150,16 @@ const Game = () => {
   }, [satImages, swiper]);
 
   const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map((index) => {
-    return <GuessRow key={index} guess={currentGame.current?.guesses[index]} />;
+    return (
+      currentGame.current && (
+        <GuessRow
+          key={index}
+          guess={currentGame.current?.guesses[index]}
+          doCount={index === currentGame.current?.guesses.length - 1}
+          onCountDone={guessDone}
+        />
+      )
+    );
   });
 
   return (
