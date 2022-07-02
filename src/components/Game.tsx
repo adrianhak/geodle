@@ -88,7 +88,7 @@ const Game = () => {
         );
       });
     });
-  }, [gameServer]);
+  }, [gameServer, currentGame]);
 
   useLayoutEffect(() => {
     currentGame.current = gameStateContext.currentGame;
