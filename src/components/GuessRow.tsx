@@ -1,14 +1,14 @@
 import React from 'react';
 import CountUp from 'react-countup';
-import { IGuess } from '../@types/Guess';
 import { ILocation } from '../@types/Location';
+import { Guess } from '../api';
 import { locations } from '../locations';
 import { getCountryEmoji } from '../util/getCountryEmoji';
 
 interface GuessRowProps {
-  guess?: IGuess;
+  guess?: Guess;
   doCount: boolean;
-  onCountDone: () => void;
+  onCountDone?: () => void;
 }
 
 const findLocation = (code: string): ILocation | undefined => {
@@ -22,10 +22,9 @@ const formatDistance = (distance: number) => {
 
 export const GuessRow = ({ guess, doCount, onCountDone }: GuessRowProps) => {
   return (
-    <div className='my-2 h-8 border-2 border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-neutral-200 text-left px-1 flex justify-between items-center'>
+    <div className='mt-2 h-8 border-2 border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-neutral-200 text-left px-1 flex justify-between items-center'>
       <div>
-        {guess &&
-          getCountryEmoji(guess.locationCode) + ' ' + findLocation(guess.locationCode)?.name}
+        {guess && getCountryEmoji(guess.location) + ' ' + findLocation(guess.location)?.name}
       </div>
       <div>
         {guess &&

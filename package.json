@@ -33,7 +33,8 @@
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
-    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "codegen": "wget http://localhost:8000/swagger.json -O swagger.json && openapi --input ./swagger.json --output ./src/api -c fetch && rm swagger.json"
   },
   "browserslist": {
     "production": [

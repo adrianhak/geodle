@@ -5,22 +5,22 @@ import { GameServerProvider } from './services/GameServer';
 import { useEffect, useState } from 'react';
 import { GameStateProvider } from './services/GameState';
 import { IGameState } from './@types/GameState';
-import { IGameRound } from './@types/GameRound';
-import { IGuess } from './@types/Guess';
 import { Slide, ToastContainer } from 'react-toastify';
 import { PageContextProvider } from './contexts/PageContext';
+import { FullGameRound, GameRound, Guess } from './api';
 
 function App() {
   const [prevGames, setPrevGames] = useState<IGameState[] | null>(null);
   const [currentGame, setCurrentGame] = useState<IGameState | null>(null);
 
   // Add a new game round to the game state
-  const setGame = (gameRound: IGameRound) => {
-    setCurrentGame({ gameRound: gameRound, guesses: [], isCompleted: false });
+  const setGame = (gameRound: GameRound) => {
+    const fullGameRound: FullGameRound = { id: gameRound.id, date: gameRound.date, answer: '' };
+    setCurrentGame({ gameRound: fullGameRound, guesses: [], isCompleted: false });
   };
 
   // TODO: Move this logic to service (and keep state in service)
-  const addGuess = (guess: IGuess) => {
+  const addGuess = (guess: Guess) => {
     setCurrentGame((gameState) => {
       if (gameState) {
         return {
@@ -111,7 +111,7 @@ function App() {
               </GameServerProvider>
             </GameStateProvider>
           </PageContextProvider>
-          <footer className='mb-3 mt-3 text-sm'>
+          <footer className='mb-3 mt-3 text-xs md:text-sm'>
             Enjoying Geodle?{' '}
             <a href='https://ko-fi.com/adrianhak' className='underline'>
               Buy me a ☕️

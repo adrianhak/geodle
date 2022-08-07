@@ -1,6 +1,8 @@
+import { FullGameRound, GameRound, Guess } from '../api';
+
 export interface IGameState {
-  gameRound: IGameRound;
-  guesses: IGuess[];
+  gameRound: FullGameRound;
+  guesses: Guess[];
   isCompleted: boolean;
 }
 
@@ -8,8 +10,8 @@ export interface GameStateContextType {
   prevGames: IGameState[] | null;
   currentGame: IGameState | null;
   maxGuesses: number;
-  setGame: (gameRound: IGameRound) => void;
+  setGame: (gameRound: GameRound) => void;
   setAnswer: (answer: string) => void;
   saveGame: (game: IGameState) => void;
-  addGuess: (guess: IGuess) => void;
+  addGuess: (guess: Guess) => void;
 }

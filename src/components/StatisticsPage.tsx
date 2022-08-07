@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BarChart, Calendar } from 'react-feather';
+import { Navigation } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import './swiper-style.css';
 import { useGameState } from '../services/GameState';
 import { Page } from './Page';
+import { GuessDistribution } from './GuessDistribution';
+import { getCountryEmoji } from '../util/getCountryEmoji';
+import { locations } from '../locations';
+import { GuessRow } from './GuessRow';
+import { ExtendedGameRound, ResultsService } from '../api';
 
 interface StatisticsPageProps {
   isOpen: boolean;
@@ -19,8 +30,38 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const prevGames = gameStateContext.prevGames;
 
   const [currentTab, setCurrentTab] = useState(Tab.Stats);
+  const [historyOffset, setHistoryOffset] = useState<number>(0);
+  const [swiper, setSwiper] = useState<any>();
+  const [gameHistory, setGameHistory] = useState<ExtendedGameRound[]>([]);
+
   const setStatsTab = () => setCurrentTab(props.initialTab ? props.initialTab : Tab.Stats);
   const setHistoryTab = () => setCurrentTab(Tab.History);
+
+  const fetchGameHistory = useCallback(() => {
+    ResultsService.resultsList(
+      10,
+      historyOffset,
+      gameStateContext.currentGame?.gameRound.answer
+    ).then((results) => {
+      setGameHistory((prevState) => [...prevState, ...results.results]);
+      //setHistoryOffset((historyOffset) => historyOffset + 10);
+    });
+  }, [historyOffset, gameStateContext.currentGame]);
+
+  // Initial fetch of game history
+  useEffect(() => {
+    if (currentTab === Tab.History && gameHistory.length === 0) {
+      fetchGameHistory();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTab]);
+
+  // Re-fetch when game is complete
+  useEffect(() => {
+    if (gameStateContext.currentGame?.isCompleted) {
+      fetchGameHistory();
+    }
+  }, [gameStateContext.currentGame?.isCompleted, fetchGameHistory]);
 
   const playCount = prevGames?.length;
   const winRate = prevGames
@@ -66,25 +107,13 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   };
 
   const guessDistribution: number[] = prevGames
-    ? prevGames
-        .filter((game) => game.guesses.some((guess) => guess.distance === 0))
-        .map((game) => game.guesses.length)
+    ? [...Array(gameStateContext.maxGuesses)].map(
+        (_, i) =>
+          prevGames.filter((game) =>
+            game.guesses.some((guess) => guess.distance === 0 && game.guesses.length === i + 1)
+          ).length
+      )
     : [];
-
-  const guessDistributionItems = [...Array(6)].map((_, i) => (
-    <div className='flex items-center' key={i}>
-      <span className='px-1 font-mono font-bold'>{i + 1}</span>
-      <span
-        style={{
-          flex: `0 1 ${Math.round(
-            (guessDistribution.filter((g) => g === i + 1).length / guessDistribution.length) * 100
-          )}%`,
-        }}
-        className={`bg-neutral-500 my-0.5 text-right px-1 font-bold text-white text-xs`}>
-        {guessDistribution.filter((g) => g === i + 1).length}
-      </span>
-    </div>
-  ));
 
   const statsTabContent = (
     <div className='mt-2'>
@@ -106,19 +135,106 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
           <span className='text-xs font-thin uppercase'>Max Streak</span>
         </div>
       </div>
-      <div className='mt-4 md:w-2/3 m-auto'>
-        <span className='mt-4 text-center text-sm font-bold tracking-wide flex flex-col justify-center uppercase'>
-          Guess Distribution
-        </span>
-        {guessDistributionItems}
-      </div>
+      <GuessDistribution
+        title='Guess Distribution'
+        distribution={guessDistribution}
+        maxGuesses={gameStateContext.maxGuesses}
+      />
     </div>
   );
 
   const historyTabContent = (
-    <div className='mt-4 flex justify-center'>
-      <span className='italic text-neutral-500 text-sm'>Coming soon</span>
-    </div>
+    <>
+      <Swiper
+        slidesPerView={1}
+        modules={[Navigation]}
+        onSwiper={(swiper) => setSwiper(swiper)}
+        navigation={{
+          prevEl: '.prev',
+          nextEl: '.next',
+        }}>
+        <div className='flex justify-between mx-8'>
+          <div className='prev'>Previous</div>
+          <span>{swiper?.activeIndex}</span>
+          <div className='next'>Next</div>
+        </div>
+        <div className='mt-4 flex justify-center text-center'>
+          {gameHistory?.map((game) => (
+            <SwiperSlide key={game.id}>
+              <div className='flex flex-col justify-center'>
+                <span className='text-sm font-semibold text-neutral-500'>Geodle #{game.id}</span>
+                {game.distribution && (
+                  <>
+                    <span className='text-base font-semibold'>
+                      {game?.answer &&
+                        getCountryEmoji(game.answer) +
+                          ' ' +
+                          locations.find((l) => l.code === game.answer)?.name}
+                    </span>
+                    <GuessDistribution
+                      title='Guess Distribution'
+                      distribution={game.distribution}
+                      maxGuesses={gameStateContext.maxGuesses}
+                      userResult={
+                        prevGames?.find(
+                          (g) =>
+                            g.gameRound.id === game.id &&
+                            g.guesses.some((guess) => guess.distance === 0)
+                        )?.guesses.length
+                      }
+                    />
+                    <div>
+                      <div className='font-semibold text-sm'>Average guess distance</div>
+                      <div className='font-bold text-xl'>
+                        {' '}
+                        {game.avg_distance.toLocaleString()} km
+                      </div>
+
+                      <div className='font-semibold text-sm mt-4'>Most guessed location</div>
+                      {game?.most_common_location && (
+                        <div className='font-bold text-xl'>
+                          {getCountryEmoji(game.most_common_location.location) +
+                            ' ' +
+                            locations.find((g) => g.code === game.most_common_location?.location)
+                              ?.name}
+                          <div className='text-xs font-semibold text-neutral-400'>
+                            (
+                            <span className='font-bold'>
+                              {Math.round(game?.most_common_location.share * 100)}%
+                            </span>{' '}
+                            of guesses)
+                          </div>
+                        </div>
+                      )}
+
+                      <div className='font-semibold text-base mt-4'>Your guesses</div>
+                      {game?.locations?.map((location, i) => (
+                        <div key={location.id} className='flex w-full items-center text-sm'>
+                          <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
+                            📍
+                            <a
+                              className='underline'
+                              href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
+                              <span className='font-mono'>#{i + 1}</span>
+                            </a>
+                          </div>
+                          <div className='flex-grow'>
+                            <GuessRow
+                              guess={prevGames?.find((g) => g.gameRound.id === game.id)?.guesses[i]}
+                              doCount={false}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </SwiperSlide>
+          ))}
+        </div>
+      </Swiper>
+    </>
   );
 
   return (
@@ -142,7 +258,9 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
             History
           </button>
         </div>
-        {currentTab === Tab.History ? historyTabContent : statsTabContent}
+        <div className='h-full overflow-y-auto'>
+          {currentTab === Tab.History ? historyTabContent : statsTabContent}
+        </div>
       </React.Fragment>
     </Page>
   );

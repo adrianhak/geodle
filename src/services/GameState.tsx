@@ -1,7 +1,6 @@
 import React from 'react';
-import { IGameRound } from '../@types/GameRound';
 import { GameStateContextType, IGameState } from '../@types/GameState';
-import { IGuess } from '../@types/Guess';
+import { GameRound, Guess } from '../api';
 
 const { createContext, useContext } = React;
 
@@ -9,9 +8,9 @@ export const InitialGameStateContext: GameStateContextType = {
   prevGames: null,
   currentGame: null,
   maxGuesses: 6,
-  setGame: (gameRound: IGameRound) => undefined, // Placeholder
+  setGame: (gameRound: GameRound) => undefined,
   setAnswer: (answer: string) => undefined,
-  addGuess: (guess: IGuess) => undefined,
+  addGuess: (guess: Guess) => undefined,
   saveGame: (game: IGameState) => undefined,
 };
 

@@ -7,7 +7,6 @@ import 'swiper/css/pagination';
 import './swiper-style.css';
 import { ILocation } from '../@types/Location';
 import { locations } from '../locations';
-import { useGameServer } from '../services/GameServer';
 import { useGameState } from '../services/GameState';
 import { GuessInput } from './GuessInput';
 import { GuessRow } from './GuessRow';
@@ -19,6 +18,8 @@ import './Game.scss';
 import { toast } from 'react-toastify';
 import { getCountryEmoji } from '../util/getCountryEmoji';
 import { Page, usePageContext } from '../contexts/PageContext';
+import { GameroundService, GuessService } from '../api';
+import { useGameServer } from '../services/GameServer';
 
 const Game = () => {
   const gameStateContext = useGameState();
@@ -48,7 +49,7 @@ const Game = () => {
     const location = locations.find((location) => location.name.toLowerCase() === guess);
     if (
       !location ||
-      gameStateContext.currentGame?.guesses.find((guess) => guess.locationCode === location.code)
+      gameStateContext.currentGame?.guesses.find((guess) => guess.location === location.code)
     ) {
       return null;
     }
@@ -67,28 +68,32 @@ const Game = () => {
         return;
         // TODO: Show error message
       }
-      gameServer
-        ?.sendGuess(currentGame.current?.guesses.length, guessedLocation.code)
-        .then((guessResponse: any) => {
-          gameStateContext.addGuess(guessResponse.guess);
-          if (guessResponse.isDone) {
-            gameStateContext.setAnswer(guessResponse.gameRound.answer);
-          }
-        });
+      GuessService.guessCreate({
+        guessNumber: currentGame.current?.guesses.length,
+        location: guessedLocation.code,
+      }).then((guess) => {
+        gameStateContext.addGuess(guess);
+        if (guess.game_round?.answer) {
+          gameStateContext.setAnswer(guess.game_round.answer);
+        }
+      });
       setCurrentGuess('');
     }
   };
 
   const getSatImage = useCallback(() => {
     if (!currentGame.current) return;
+    // TODO: Change to generated FetchImageService once this PR gets merged
+    // https://github.com/ferdikoomen/openapi-typescript-codegen/pull/986
     gameServer?.getSatImage(currentGame.current.guesses.length, false).then((satImage) => {
+      console.log(satImage);
       blobToBase64(satImage).then((satImageBase64) => {
         setSatImages((satImages) =>
           satImages ? [...satImages, satImageBase64] : [satImageBase64]
         );
       });
     });
-  }, [gameServer, currentGame]);
+  }, [currentGame, gameServer]);
 
   useLayoutEffect(() => {
     currentGame.current = gameStateContext.currentGame;
@@ -107,27 +112,29 @@ const Game = () => {
       return;
     }
     // Else, ask the server for a new game round
-    gameServer?.getGameRound().then((gameRound) => {
+    GameroundService.gameroundRead().then((gameRound) => {
       setGame.current(gameRound);
       localStorage.setItem('satImages', '[]');
       setSatImages([]);
       getSatImage();
     }); // TODO: Add error handling
-  }, [gameServer, gameStateContext.currentGame?.gameRound, getSatImage]);
+  }, [gameStateContext.currentGame?.gameRound, getSatImage]);
 
   // Guess has been made and result shown to user, fetch next sat image or end game (callback for countup end)
   const guessDone = () => {
     if (currentGame.current?.isCompleted) {
       const lastGuess = currentGame.current?.guesses[currentGame.current.guesses.length - 1];
       saveGame.current(currentGame.current);
-      lastGuess.distance === 0
-        ? toast('Good job!')
-        : toast(
-            getCountryEmoji(currentGame.current.gameRound.answer) +
-              ' ' +
-              locations.find((location) => location.code === currentGame.current?.gameRound.answer)
-                ?.name
-          );
+      if (lastGuess.distance === 0) {
+        toast('Good job!');
+      } else if (lastGuess.game_round?.answer) {
+        toast(
+          getCountryEmoji(lastGuess.game_round.answer) +
+            ' ' +
+            locations.find((location) => location.code === currentGame.current?.gameRound.answer)
+              ?.name
+        );
+      }
       setTimeout(() => pageContext.show(Page.Statistics), 1500);
     } else if (
       currentGame.current &&
@@ -180,18 +187,20 @@ const Game = () => {
 
       <div className='text-black mt-2'>
         {guessRows}
-        {currentGame.current?.isCompleted === true ? (
-          <Share />
-        ) : (
-          <form onSubmit={handleGuessSubmission}>
-            <GuessInput currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} />
-            <button
-              type='submit'
-              className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>
-              GUESS
-            </button>
-          </form>
-        )}
+        <div className='mt-2'>
+          {currentGame.current?.isCompleted === true ? (
+            <Share />
+          ) : (
+            <form onSubmit={handleGuessSubmission}>
+              <GuessInput currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} />
+              <button
+                type='submit'
+                className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>
+                GUESS
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

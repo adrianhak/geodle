@@ -31,7 +31,7 @@ export const Page = (props: PageProps) => {
       contentLabel={props.pageTitle}
       shouldCloseOnOverlayClick={true}>
       <Transition
-        className='bg-neutral-100 dark:bg-black w-full h-full p-2 border border-neutral-400'
+        className='bg-neutral-100 dark:bg-black w-full h-full p-2 border border-neutral-400 flex flex-col'
         as='div'
         appear={true} //THIS will make the transition run everytime the component is rendered
         show={props.showPage}
