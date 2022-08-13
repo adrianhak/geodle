@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { BarChart, Calendar } from 'react-feather';
-import { Navigation } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { BarChart, Calendar, ChevronLeft, ChevronRight } from 'react-feather';
+import Swiper, { Navigation } from 'swiper';
+import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -20,9 +20,20 @@ interface StatisticsPageProps {
   initialTab?: Tab;
 }
 
+interface HistoryMetadata {
+  offset: number;
+  total: number;
+}
+
 enum Tab {
   Stats,
   History,
+}
+
+enum SlideStatus {
+  First,
+  Middle,
+  Last,
 }
 
 export const StatisticsPage = (props: StatisticsPageProps) => {
@@ -30,23 +41,26 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const prevGames = gameStateContext.prevGames;
 
   const [currentTab, setCurrentTab] = useState(Tab.Stats);
-  const [historyOffset, setHistoryOffset] = useState<number>(0);
-  const [swiper, setSwiper] = useState<any>();
+  const [history, setHistory] = useState<HistoryMetadata>({ offset: 0, total: 0 });
   const [gameHistory, setGameHistory] = useState<ExtendedGameRound[]>([]);
+  const [slideStatus, setSlideStatus] = useState<SlideStatus>(SlideStatus.First);
 
   const setStatsTab = () => setCurrentTab(props.initialTab ? props.initialTab : Tab.Stats);
   const setHistoryTab = () => setCurrentTab(Tab.History);
 
-  const fetchGameHistory = useCallback(() => {
+  const fetchGameHistory = () => {
     ResultsService.resultsList(
       10,
-      historyOffset,
+      history.offset,
       gameStateContext.currentGame?.gameRound.answer
     ).then((results) => {
       setGameHistory((prevState) => [...prevState, ...results.results]);
-      //setHistoryOffset((historyOffset) => historyOffset + 10);
+      setHistory((historyOffset) => ({
+        offset: historyOffset.offset + 10,
+        total: results.count,
+      }));
     });
-  }, [historyOffset, gameStateContext.currentGame]);
+  };
 
   // Initial fetch of game history
   useEffect(() => {
@@ -61,7 +75,8 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
     if (gameStateContext.currentGame?.isCompleted) {
       fetchGameHistory();
     }
-  }, [gameStateContext.currentGame?.isCompleted, fetchGameHistory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStateContext.currentGame?.isCompleted]);
 
   const playCount = prevGames?.length;
   const winRate = prevGames
@@ -143,29 +158,58 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
     </div>
   );
 
+  const onSlide = (swiper: Swiper) => {
+    console.log(swiper.activeIndex);
+    console.log(swiper.slides.length - 1);
+    if (swiper.activeIndex === 0) {
+      setSlideStatus(SlideStatus.First);
+    } else if (swiper.activeIndex === swiper.slides.length - 1) {
+      if (swiper.slides.length === history.total) {
+        setSlideStatus(SlideStatus.Last);
+      } else {
+        fetchGameHistory();
+      }
+    } else {
+      setSlideStatus(SlideStatus.Middle);
+    }
+  };
+
   const historyTabContent = (
     <>
-      <Swiper
+      <div className='flex justify-between mx-2 mt-2'>
+        <div
+          className={`prev ${
+            slideStatus === SlideStatus.First
+              ? 'text-neutral-300 cursor-default'
+              : 'text-neutral-700 cursor-pointer'
+          }`}>
+          <ChevronLeft size={32} />
+        </div>
+        <div
+          className={`next ${
+            slideStatus === SlideStatus.Last
+              ? 'text-neutral-300 cursor-default'
+              : 'text-neutral-700 cursor-pointer'
+          } focus:black`}>
+          <ChevronRight size={32} />
+        </div>
+      </div>
+      <SwiperComponent
         slidesPerView={1}
         modules={[Navigation]}
-        onSwiper={(swiper) => setSwiper(swiper)}
+        onSlideChange={(swiper) => onSlide(swiper)}
         navigation={{
           prevEl: '.prev',
           nextEl: '.next',
         }}>
-        <div className='flex justify-between mx-8'>
-          <div className='prev'>Previous</div>
-          <span>{swiper?.activeIndex}</span>
-          <div className='next'>Next</div>
-        </div>
         <div className='mt-4 flex justify-center text-center'>
           {gameHistory?.map((game) => (
             <SwiperSlide key={game.id}>
-              <div className='flex flex-col justify-center'>
+              <div className='flex flex-col justify-center text-center'>
                 <span className='text-sm font-semibold text-neutral-500'>Geodle #{game.id}</span>
                 {game.distribution && (
                   <>
-                    <span className='text-base font-semibold'>
+                    <span className='text-xl font-semibold'>
                       {game?.answer &&
                         getCountryEmoji(game.answer) +
                           ' ' +
@@ -184,28 +228,34 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                       }
                     />
                     <div>
-                      <div className='font-semibold text-sm'>Average guess distance</div>
-                      <div className='font-bold text-xl'>
-                        {' '}
-                        {game.avg_distance.toLocaleString()} km
-                      </div>
-
-                      <div className='font-semibold text-sm mt-4'>Most guessed location</div>
-                      {game?.most_common_location && (
-                        <div className='font-bold text-xl'>
-                          {getCountryEmoji(game.most_common_location.location) +
-                            ' ' +
-                            locations.find((g) => g.code === game.most_common_location?.location)
-                              ?.name}
-                          <div className='text-xs font-semibold text-neutral-400'>
-                            (
-                            <span className='font-bold'>
-                              {Math.round(game?.most_common_location.share * 100)}%
-                            </span>{' '}
-                            of guesses)
+                      <div className='sm:flex sm:justify-around sm:items-baseline'>
+                        <div>
+                          <div className='font-semibold text-sm'>Average guess distance</div>
+                          <div className='font-bold text-xl'>
+                            {' '}
+                            {game.avg_distance.toLocaleString()} km
                           </div>
                         </div>
-                      )}
+                        <div>
+                          <div className='font-semibold text-sm mt-4'>Most guessed location</div>
+                          {game?.most_common_location && (
+                            <div className='font-semibold text-base'>
+                              {getCountryEmoji(game.most_common_location.location) +
+                                ' ' +
+                                locations.find(
+                                  (g) => g.code === game.most_common_location?.location
+                                )?.name}
+                              <div className='text-xs font-semibold text-neutral-400'>
+                                (
+                                <span className='font-bold'>
+                                  {Math.round(game?.most_common_location.share * 100)}%
+                                </span>{' '}
+                                of guesses)
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
                       <div className='font-semibold text-base mt-4'>Your guesses</div>
                       {game?.locations?.map((location, i) => (
@@ -233,7 +283,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
             </SwiperSlide>
           ))}
         </div>
-      </Swiper>
+      </SwiperComponent>
     </>
   );
 
