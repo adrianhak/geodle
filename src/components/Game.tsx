@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FormEvent, useRef, useLayoutEffect, useCallback } from 'react';
 import { Pagination } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
+import type { Swiper } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -27,9 +28,9 @@ const Game = () => {
   const pageContext = usePageContext();
   const setGame = useRef(gameStateContext.setGame);
   const saveGame = useRef(gameStateContext.saveGame);
-  const currentGame = useRef(gameStateContext.currentGame);
+  const currentGame = gameStateContext.currentGame;
 
-  const [swiper, setSwiper] = useState<any>(null);
+  const [swiper, setSwiper] = useState<Swiper>();
   const [currentGuess, setCurrentGuess] = useState<string>('');
   const [satImages, setSatImages] = useState<string[] | null>(null);
 
@@ -60,16 +61,16 @@ const Game = () => {
   const handleGuessSubmission = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Only allow guesses if gameround was fetched correctly
-    if (currentGame.current?.gameRound.id) {
+    if (currentGame?.gameRound.id) {
       // Validate the guess and create a Guess object
       const guessedLocation: ILocation | null = validateGuess(currentGuess);
-      if (!guessedLocation || currentGame.current?.guesses.length >= gameStateContext.maxGuesses) {
+      if (!guessedLocation || currentGame?.guesses.length >= gameStateContext.maxGuesses) {
         console.error('Invalid guess: %s', currentGuess);
         return;
         // TODO: Show error message
       }
       GuessService.guessCreate({
-        guessNumber: currentGame.current?.guesses.length,
+        guessNumber: currentGame?.guesses.length,
         location: guessedLocation.code,
       }).then((guess) => {
         gameStateContext.addGuess(guess);
@@ -82,11 +83,10 @@ const Game = () => {
   };
 
   const getSatImage = useCallback(() => {
-    if (!currentGame.current) return;
+    if (!currentGame) return;
     // TODO: Change to generated FetchImageService once this PR gets merged
     // https://github.com/ferdikoomen/openapi-typescript-codegen/pull/986
-    gameServer?.getSatImage(currentGame.current.guesses.length, false).then((satImage) => {
-      console.log(satImage);
+    gameServer?.getSatImage(currentGame.guesses.length, false).then((satImage) => {
       blobToBase64(satImage).then((satImageBase64) => {
         setSatImages((satImages) =>
           satImages ? [...satImages, satImageBase64] : [satImageBase64]
@@ -95,20 +95,22 @@ const Game = () => {
     });
   }, [currentGame, gameServer]);
 
-  useLayoutEffect(() => {
-    currentGame.current = gameStateContext.currentGame;
-  }, [gameStateContext.currentGame]);
-
   // Initial load of game state
   useEffect(() => {
-    // Ignore initial empty state and completed state
-    if (currentGame.current === null) {
+    if (gameStateContext.currentGame === null) {
       return;
     }
     // If there exists a current and ongoing game, load any previous images and do nothing else
-    if (validateGameRoundDate(currentGame.current?.gameRound.date)) {
+    if (
+      gameStateContext.currentGame &&
+      validateGameRoundDate(gameStateContext.currentGame?.gameRound.date)
+    ) {
       const storedImages = localStorage.getItem('satImages');
-      setSatImages(storedImages ? JSON.parse(storedImages) : []);
+      if (storedImages && storedImages !== '[]') {
+        setSatImages(JSON.parse(storedImages));
+      } else {
+        getSatImage();
+      }
       return;
     }
     // Else, ask the server for a new game round
@@ -118,29 +120,29 @@ const Game = () => {
       setSatImages([]);
       getSatImage();
     }); // TODO: Add error handling
-  }, [gameStateContext.currentGame?.gameRound, getSatImage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStateContext.currentGame]);
 
   // Guess has been made and result shown to user, fetch next sat image or end game (callback for countup end)
   const guessDone = () => {
-    if (currentGame.current?.isCompleted) {
-      const lastGuess = currentGame.current?.guesses[currentGame.current.guesses.length - 1];
-      saveGame.current(currentGame.current);
+    if (currentGame?.isCompleted) {
+      const lastGuess = currentGame?.guesses[currentGame.guesses.length - 1];
+      saveGame.current(currentGame);
       if (lastGuess.distance === 0) {
         toast('Good job!');
       } else if (lastGuess.game_round?.answer) {
         toast(
           getCountryEmoji(lastGuess.game_round.answer) +
             ' ' +
-            locations.find((location) => location.code === currentGame.current?.gameRound.answer)
-              ?.name
+            locations.find((location) => location.code === currentGame?.gameRound.answer)?.name
         );
       }
       setTimeout(() => pageContext.show(Page.Statistics), 1500);
     } else if (
-      currentGame.current &&
-      currentGame.current.isCompleted === false &&
-      currentGame.current?.guesses.length < gameStateContext.maxGuesses &&
-      currentGame.current?.guesses.length === satImages?.length
+      currentGame &&
+      currentGame.isCompleted === false &&
+      currentGame?.guesses.length < gameStateContext.maxGuesses &&
+      currentGame?.guesses.length === satImages?.length
     )
       getSatImage();
   };
@@ -158,11 +160,11 @@ const Game = () => {
 
   const guessRows = [...Array(gameStateContext.maxGuesses).keys()].map((index) => {
     return (
-      currentGame.current && (
+      currentGame && (
         <GuessRow
           key={index}
-          guess={currentGame.current?.guesses[index]}
-          doCount={index === currentGame.current?.guesses.length - 1}
+          guess={currentGame?.guesses[index]}
+          doCount={index === currentGame?.guesses.length - 1}
           onCountDone={guessDone}
         />
       )
@@ -171,7 +173,7 @@ const Game = () => {
 
   return (
     <div className='game m-auto mt-4 w-full md:w-8/12'>
-      <Swiper
+      <SwiperComponent
         onSwiper={(swiper) => setSwiper(swiper)}
         slidesPerView={1}
         modules={[Pagination]}
@@ -183,12 +185,12 @@ const Game = () => {
             <img src={satImage} alt='Satellite' className='object-fit w-full m-auto h-72' />
           </SwiperSlide>
         ))}
-      </Swiper>
+      </SwiperComponent>
 
       <div className='text-black mt-2'>
         {guessRows}
         <div className='mt-2'>
-          {currentGame.current?.isCompleted === true ? (
+          {currentGame?.isCompleted === true ? (
             <Share />
           ) : (
             <form onSubmit={handleGuessSubmission}>

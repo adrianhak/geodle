@@ -42,10 +42,12 @@ class GameRound(models.Model):
         return self.guesses.filter(Q(guessNumber=MAX_GUESSES-1) | Q(location=self.answer)).count()
 
     @property
-    # Format distribution as a list where index is the guess index and the value is the number of guesses
-    # Example: [1,0,2,3,5,9]
+    # Format distribution as a list where index is the guess index and the value is the percentage of correct guesses
+    # Example: [10,0,25,20,30,15]
     def distribution(self):
-        dist = list(self.guesses.filter(location=self.answer).values('guessNumber').annotate(c=Count('guessNumber')))
+        correctGuesses = self.guesses.filter(location=self.answer)
+        print(int((1/2)*100))
+        dist = list(correctGuesses.values('guessNumber').annotate(c=((Count('guessNumber')*1.0 / correctGuesses.count()*1.0)*100)))
         guessNumbers = [g['guessNumber'] for g in dist]
         return [dist[guessNumbers.index(i)]['c'] if i in guessNumbers else 0 for i in range(MAX_GUESSES)]
 

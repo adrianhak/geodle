@@ -159,8 +159,6 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   );
 
   const onSlide = (swiper: Swiper) => {
-    console.log(swiper.activeIndex);
-    console.log(swiper.slides.length - 1);
     if (swiper.activeIndex === 0) {
       setSlideStatus(SlideStatus.First);
     } else if (swiper.activeIndex === swiper.slides.length - 1) {
@@ -197,6 +195,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
       <SwiperComponent
         slidesPerView={1}
         modules={[Navigation]}
+        onSwiper={() => setSlideStatus(SlideStatus.First)}
         onSlideChange={(swiper) => onSlide(swiper)}
         navigation={{
           prevEl: '.prev',
@@ -216,7 +215,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                           locations.find((l) => l.code === game.answer)?.name}
                     </span>
                     <GuessDistribution
-                      title='Guess Distribution'
+                      title='Guess Distribution (%)'
                       distribution={game.distribution}
                       maxGuesses={gameStateContext.maxGuesses}
                       userResult={
@@ -238,7 +237,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                         </div>
                         <div>
                           <div className='font-semibold text-sm mt-4'>Most guessed location</div>
-                          {game?.most_common_location && (
+                          {game?.most_common_location ? (
                             <div className='font-semibold text-base'>
                               {getCountryEmoji(game.most_common_location.location) +
                                 ' ' +
@@ -253,29 +252,39 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                                 of guesses)
                               </div>
                             </div>
+                          ) : (
+                            '—'
                           )}
                         </div>
                       </div>
 
                       <div className='font-semibold text-base mt-4'>Your guesses</div>
-                      {game?.locations?.map((location, i) => (
-                        <div key={location.id} className='flex w-full items-center text-sm'>
-                          <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
-                            📍
-                            <a
-                              className='underline'
-                              href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
-                              <span className='font-mono'>#{i + 1}</span>
-                            </a>
+                      {game.locations ? (
+                        game.locations.map((location, i) => (
+                          <div key={location.id} className='flex w-full items-center text-sm'>
+                            <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
+                              📍
+                              <a
+                                className='underline'
+                                href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
+                                <span className='font-mono'>#{i + 1}</span>
+                              </a>
+                            </div>
+                            <div className='flex-grow'>
+                              <GuessRow
+                                guess={
+                                  prevGames?.find((g) => g.gameRound.id === game.id)?.guesses[i]
+                                }
+                                doCount={false}
+                              />
+                            </div>
                           </div>
-                          <div className='flex-grow'>
-                            <GuessRow
-                              guess={prevGames?.find((g) => g.gameRound.id === game.id)?.guesses[i]}
-                              doCount={false}
-                            />
-                          </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className='text-sm text-neutral-400'>
+                          You have not played this round yet
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
