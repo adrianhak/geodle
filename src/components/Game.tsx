@@ -83,7 +83,7 @@ const Game = () => {
   };
 
   const getSatImage = useCallback(() => {
-    if (!currentGame) return;
+    if (!currentGame || gameServer?.isLoading) return;
     // TODO: Change to generated FetchImageService once this PR gets merged
     // https://github.com/ferdikoomen/openapi-typescript-codegen/pull/986
     gameServer?.getSatImage(currentGame.guesses.length, false).then((satImage) => {
@@ -115,11 +115,15 @@ const Game = () => {
     }
     // Else, ask the server for a new game round
     GameroundService.gameroundRead().then((gameRound) => {
-      setGame.current(gameRound);
-      localStorage.setItem('satImages', '[]');
-      setSatImages([]);
-      getSatImage();
-    }); // TODO: Add error handling
+      if (validateGameRoundDate(gameRound.date)) {
+        setGame.current(gameRound);
+        localStorage.setItem('satImages', '[]');
+        setSatImages([]);
+        getSatImage();
+      } else {
+        // TODO: Add error handling
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStateContext.currentGame]);
 
