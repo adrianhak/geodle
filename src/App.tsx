@@ -66,7 +66,12 @@ function App() {
     );
     // Load previously stored game states
     const storedState = localStorage.getItem('prevGames');
-    setPrevGames(storedState ? JSON.parse(storedState) : []);
+    try {
+      setPrevGames(storedState ? JSON.parse(storedState) : []);
+    } catch (e: unknown) {
+      console.error(e);
+      setPrevGames([]);
+    }
   }, []);
 
   // Write game states to local storage when changed
