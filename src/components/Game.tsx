@@ -141,7 +141,7 @@ const Game = () => {
             locations.find((location) => location.code === currentGame?.gameRound.answer)?.name
         );
       }
-      setTimeout(() => pageContext.show(Page.Statistics), 1500);
+      setTimeout(() => pageContext.show(Page.Statistics, 1), 1500);
     } else if (
       currentGame &&
       currentGame.isCompleted === false &&

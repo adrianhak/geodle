@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Calendar, ChevronLeft, ChevronRight } from 'react-feather';
 import Swiper, { Navigation } from 'swiper';
 import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
@@ -13,11 +13,13 @@ import { getCountryEmoji } from '../util/getCountryEmoji';
 import { locations } from '../locations';
 import { GuessRow } from './GuessRow';
 import { ExtendedGameRound, ResultsService } from '../api';
+import moment from 'moment';
+import { AvgDistance } from './AvgDistance';
+import { usePageContext } from '../contexts/PageContext';
 
 interface StatisticsPageProps {
   isOpen: boolean;
   close: () => void;
-  initialTab?: Tab;
 }
 
 interface HistoryMetadata {
@@ -39,14 +41,17 @@ enum SlideStatus {
 export const StatisticsPage = (props: StatisticsPageProps) => {
   const gameStateContext = useGameState();
   const prevGames = gameStateContext.prevGames;
+  const pageContext = usePageContext();
 
-  const [currentTab, setCurrentTab] = useState(Tab.Stats);
+  const [currentTab, setCurrentTab] = useState(
+    pageContext.currentTab === 1 ? Tab.History : Tab.Stats
+  );
   const [history, setHistory] = useState<HistoryMetadata>({ offset: 0, total: 0 });
   const [gameHistory, setGameHistory] = useState<ExtendedGameRound[]>([]);
   const [slideStatus, setSlideStatus] = useState<SlideStatus>(SlideStatus.First);
 
-  const setStatsTab = () => setCurrentTab(props.initialTab ? props.initialTab : Tab.Stats);
-  const setHistoryTab = () => setCurrentTab(Tab.History);
+  const setStatsTab = () => pageContext.setTab(0);
+  const setHistoryTab = () => pageContext.setTab(1);
 
   const fetchGameHistory = () => {
     ResultsService.resultsList(
@@ -62,6 +67,19 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
     });
   };
 
+  useEffect(() => {
+    switch (pageContext.currentTab) {
+      case 0:
+        setCurrentTab(Tab.Stats);
+        break;
+      case 1:
+        setCurrentTab(Tab.History);
+        break;
+      default:
+        setCurrentTab(Tab.Stats);
+    }
+  }, [pageContext.currentTab]);
+
   // Initial fetch of game history
   useEffect(() => {
     if (currentTab === Tab.History && gameHistory.length === 0) {
@@ -70,7 +88,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTab]);
 
-  // Re-fetch when game is complete
+  // Re-fetch stats for today's round when completed
   useEffect(() => {
     if (gameStateContext.currentGame?.isCompleted) {
       fetchGameHistory();
@@ -130,6 +148,16 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
       )
     : [];
 
+  const getAvgDistance = (): number | undefined => {
+    if (!prevGames) return undefined;
+    const guesses = prevGames
+      .map((g) => g.guesses)
+      .flat()
+      .map((guess) => guess.distance);
+    const sum = guesses.reduce((a, b) => a + b, 0);
+    return Math.round(sum / guesses.length);
+  };
+
   const statsTabContent = (
     <div className='mt-2'>
       <div className='flex items-center justify-evenly'>
@@ -155,6 +183,9 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
         distribution={guessDistribution}
         maxGuesses={gameStateContext.maxGuesses}
       />
+      <div className='mt-2'>
+        <AvgDistance distance={getAvgDistance()} />
+      </div>
     </div>
   );
 
@@ -178,16 +209,16 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
         <div
           className={`prev ${
             slideStatus === SlideStatus.First
-              ? 'text-neutral-300 cursor-default'
-              : 'text-neutral-700 cursor-pointer'
+              ? 'text-neutral-300 dark:text-neutral-700 cursor-default'
+              : 'text-neutral-700 dark:text-neutral-300 cursor-pointer'
           }`}>
           <ChevronLeft size={32} />
         </div>
         <div
           className={`next ${
             slideStatus === SlideStatus.Last
-              ? 'text-neutral-300 cursor-default'
-              : 'text-neutral-700 cursor-pointer'
+              ? 'text-neutral-300 dark:text-neutral-700 cursor-default'
+              : 'text-neutral-700 dark:text-neutral-300 cursor-pointer'
           } focus:black`}>
           <ChevronRight size={32} />
         </div>
@@ -205,7 +236,12 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
           {gameHistory?.map((game) => (
             <SwiperSlide key={game.id}>
               <div className='flex flex-col justify-center text-center'>
-                <span className='text-sm font-semibold text-neutral-500'>Geodle #{game.id}</span>
+                <div>
+                  <span className='text-sm font-semibold text-neutral-500'>Geodle #{game.id}</span>
+                  <span className='text-xs font-semibold text-neutral-500 flex justify-center'>
+                    {moment.utc(game.date).toDate().toLocaleDateString()}
+                  </span>
+                </div>
                 {game.distribution && (
                   <>
                     <span className='text-xl font-semibold'>
@@ -228,13 +264,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                     />
                     <div>
                       <div className='sm:flex sm:justify-around sm:items-baseline'>
-                        <div>
-                          <div className='font-semibold text-sm'>Average guess distance</div>
-                          <div className='font-bold text-xl'>
-                            {' '}
-                            {game.avg_distance.toLocaleString()} km
-                          </div>
-                        </div>
+                        <AvgDistance distance={game.avg_distance} />
                         <div>
                           <div className='font-semibold text-sm mt-4'>Most guessed location</div>
                           {game?.most_common_location ? (
@@ -265,7 +295,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                             <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
                               📍
                               <a
-                                className='underline'
+                                className='underline dark:text-white'
                                 href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
                                 <span className='font-mono'>#{i + 1}</span>
                               </a>
@@ -282,7 +312,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                         ))
                       ) : (
                         <p className='text-sm text-neutral-400'>
-                          You have not played this round yet
+                          You have not yet played this round
                         </p>
                       )}
                     </div>
@@ -312,7 +342,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
             onClick={setHistoryTab}
             className={`${
               currentTab === Tab.History && 'bg-neutral-200 dark:bg-neutral-800'
-            }tracking-wide p-2 px-3 font-semibold uppercase text-xs flex items-center hover:bg-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-100`}>
+            } tracking-wide p-2 px-3 font-semibold uppercase text-xs flex items-center hover:bg-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-100`}>
             <Calendar width={18} className='mr-2' />
             History
           </button>
