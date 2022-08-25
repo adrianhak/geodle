@@ -32,6 +32,7 @@ const Game = () => {
 
   const [swiper, setSwiper] = useState<Swiper>();
   const [currentGuess, setCurrentGuess] = useState<string>('');
+  const [isPendingGuess, setIsPendingGuess] = useState<boolean>(false);
   const [satImages, setSatImages] = useState<string[] | null>(null);
 
   // Return true if <24 hours have passed since the date provided by the game round (according to local time)
@@ -69,6 +70,7 @@ const Game = () => {
         return;
         // TODO: Show error message
       }
+      setIsPendingGuess(true);
       GuessService.guessCreate({
         guessNumber: currentGame?.guesses.length,
         location: guessedLocation.code,
@@ -129,6 +131,7 @@ const Game = () => {
 
   // Guess has been made and result shown to user, fetch next sat image or end game (callback for countup end)
   const guessDone = () => {
+    setIsPendingGuess(false);
     if (currentGame?.isCompleted) {
       const lastGuess = currentGame?.guesses[currentGame.guesses.length - 1];
       saveGame.current(currentGame);
@@ -194,17 +197,15 @@ const Game = () => {
       <div className='text-black mt-2'>
         {guessRows}
         <div className='mt-2'>
-          {currentGame?.isCompleted === true ? (
+          {currentGame?.isCompleted === true && !isPendingGuess ? (
             <Share />
           ) : (
-            <form onSubmit={handleGuessSubmission}>
-              <GuessInput currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} />
-              <button
-                type='submit'
-                className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 mt-2 hover:bg-green-800'>
-                GUESS
-              </button>
-            </form>
+            <GuessInput
+              currentGuess={currentGuess}
+              setCurrentGuess={setCurrentGuess}
+              onSubmit={handleGuessSubmission}
+              isPendingGuess={isPendingGuess}
+            />
           )}
         </div>
       </div>
