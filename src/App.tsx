@@ -8,6 +8,7 @@ import { IGameState } from './@types/GameState';
 import { Slide, ToastContainer } from 'react-toastify';
 import { PageContextProvider } from './contexts/PageContext';
 import { FullGameRound, GameRound, Guess } from './api';
+import { SettingsContextProvider } from './contexts/SettingsContext';
 
 function App() {
   const [prevGames, setPrevGames] = useState<IGameState[] | null>(null);
@@ -101,20 +102,22 @@ function App() {
       <div className='App min-h-full text-neutral-900 dark:text-white text-center bg-neutral-100 dark:bg-neutral-900 flex flex-auto justify-center'>
         <div className='max-w-2xl w-full flex flex-col'>
           <PageContextProvider>
-            <GameStateProvider
-              prevGames={prevGames}
-              currentGame={currentGame}
-              setGame={setGame}
-              setAnswer={setAnswer}
-              addGuess={addGuess}
-              saveGame={saveGame}>
-              <GameServerProvider>
-                <Navbar></Navbar>
-                <div className='px-2 flex-grow'>
-                  <Game></Game>
-                </div>
-              </GameServerProvider>
-            </GameStateProvider>
+            <SettingsContextProvider>
+              <GameStateProvider
+                prevGames={prevGames}
+                currentGame={currentGame}
+                setGame={setGame}
+                setAnswer={setAnswer}
+                addGuess={addGuess}
+                saveGame={saveGame}>
+                <GameServerProvider>
+                  <Navbar></Navbar>
+                  <div className='px-2 flex-grow'>
+                    <Game></Game>
+                  </div>
+                </GameServerProvider>
+              </GameStateProvider>
+            </SettingsContextProvider>
           </PageContextProvider>
           <footer className='mb-3 mt-3 text-xs md:text-sm'>
             Enjoying Geodle?{' '}

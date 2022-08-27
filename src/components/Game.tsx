@@ -21,11 +21,13 @@ import { getCountryEmoji } from '../util/getCountryEmoji';
 import { Page, usePageContext } from '../contexts/PageContext';
 import { GameroundService, GuessService } from '../api';
 import { useGameServer } from '../services/GameServer';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 const Game = () => {
   const gameStateContext = useGameState();
   const gameServer = useGameServer();
   const pageContext = usePageContext();
+  const { settings } = useSettingsContext();
   const setGame = useRef(gameStateContext.setGame);
   const saveGame = useRef(gameStateContext.saveGame);
   const currentGame = gameStateContext.currentGame;
@@ -88,13 +90,14 @@ const Game = () => {
     if (!currentGame || gameServer?.isLoading) return;
     // TODO: Change to generated FetchImageService once this PR gets merged
     // https://github.com/ferdikoomen/openapi-typescript-codegen/pull/986
-    gameServer?.getSatImage(currentGame.guesses.length, false).then((satImage) => {
+    gameServer?.getSatImage(currentGame.guesses.length, settings.showLabels).then((satImage) => {
       blobToBase64(satImage).then((satImageBase64) => {
         setSatImages((satImages) =>
           satImages ? [...satImages, satImageBase64] : [satImageBase64]
         );
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGame, gameServer]);
 
   // Initial load of game state
