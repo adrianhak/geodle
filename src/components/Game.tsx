@@ -182,22 +182,24 @@ const Game = () => {
   });
 
   return (
-    <div className='game m-auto mt-4 w-full md:w-8/12'>
-      <SwiperComponent
-        onSwiper={(swiper) => setSwiper(swiper)}
-        slidesPerView={1}
-        modules={[Pagination]}
-        pagination={{
-          clickable: true,
-        }}>
-        {satImages?.map((satImage, index) => (
-          <SwiperSlide key={index}>
-            <img src={satImage} alt='Satellite' className='object-fit w-full m-auto h-72' />
-          </SwiperSlide>
-        ))}
-      </SwiperComponent>
+    <div className='game m-auto mt-2 md:mt-4 w-full md:w-8/12'>
+      <div className='md:px-2'>
+        <SwiperComponent
+          onSwiper={(swiper) => setSwiper(swiper)}
+          slidesPerView={1}
+          modules={[Pagination]}
+          pagination={{
+            clickable: true,
+          }}>
+          {satImages?.map((satImage, index) => (
+            <SwiperSlide key={index}>
+              <img src={satImage} alt='Satellite' className='object-fit w-full m-auto h-72' />
+            </SwiperSlide>
+          ))}
+        </SwiperComponent>
+      </div>
 
-      <div className='text-black mt-2'>
+      <div className='text-black mt-2 px-2'>
         {guessRows}
         <div className='mt-2'>
           {currentGame?.isCompleted === true && !isPendingGuess ? (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const { createContext, useContext } = React;
 
@@ -80,18 +80,29 @@ export const SettingsContextProvider = (props: any) => {
     );
   }, [language, units, theme, showLabels]);
 
-  // Handle theme changes with tailwind
   useEffect(() => {
-    const html = document.documentElement;
-    if (!html) return;
-    if (
-      theme === Theme.Dark ||
-      (theme === Theme.System && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
+    // Handle theme changes with tailwind
+    const onThemeChange = () => {
+      const html = document.documentElement;
+      if (!html) return;
+      if (
+        theme === Theme.Dark ||
+        (theme === Theme.System && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+    };
+
+    // If system theme changes, update the theme withour requiring a refresh
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onThemeChange);
+    onThemeChange();
+    return () => {
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .removeEventListener('change', onThemeChange);
+    };
   }, [theme]);
 
   return (

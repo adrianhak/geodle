@@ -30,13 +30,13 @@ export const SettingsPage = (props: SettingsPageProps) => {
       <div className='flex flex-col justify-items-stretch w-11/12 mx-auto'>
         {settingsBuilder.build().map((section, i) => (
           <>
-            <h2 className='text-sm mt-8 uppercase' key={i}>
+            <h2 className='text-sm mt-8 uppercase text-neutral-500' key={i}>
               {section.title}
             </h2>
             {section.items.map((item, j) => (
               <>
                 <SettingItem
-                  key={j}
+                  key={j + i}
                   title={item.title}
                   subtitle={item?.subtitle}
                   options={item.options}
@@ -45,7 +45,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
                   isDisabled={item.isDisabled}
                   setValue={item.setValue}
                 />
-                <div className='border-b border-neutral-300'></div>
+                <div className='border-b border-neutral-300 dark:border-neutral-600'></div>
               </>
             ))}
           </>

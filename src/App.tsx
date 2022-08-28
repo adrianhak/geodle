@@ -112,7 +112,7 @@ function App() {
                 saveGame={saveGame}>
                 <GameServerProvider>
                   <Navbar></Navbar>
-                  <div className='px-2 flex-grow'>
+                  <div className='flex-grow'>
                     <Game></Game>
                   </div>
                 </GameServerProvider>
