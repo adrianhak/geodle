@@ -89,6 +89,18 @@ function App() {
     }
   }, [currentGame]);
 
+  // Developer tools
+  const resetToday = () => {
+    if (prevGames) {
+      setPrevGames(prevGames.filter((game) => game.gameRound.id !== currentGame?.gameRound.id));
+    }
+    setCurrentGame({
+      gameRound: { answer: '', date: '', id: 0 },
+      guesses: [],
+      isCompleted: false,
+    });
+  };
+
   return (
     <>
       <ToastContainer
@@ -109,6 +121,7 @@ function App() {
                 setGame={setGame}
                 setAnswer={setAnswer}
                 addGuess={addGuess}
+                resetToday={resetToday}
                 saveGame={saveGame}>
                 <GameServerProvider>
                   <Navbar></Navbar>

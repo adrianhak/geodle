@@ -45,7 +45,7 @@ export const SettingItem = ({
 
   const selectAction = (
     <select
-      className='h-8 w-28 font-light text-sm dark:bg-gray-700'
+      className='h-8 w-28 font-light text-sm pl-1 dark:bg-gray-700'
       onChange={onUpdateSetting}
       defaultValue={currentValue as string}>
       {options.map((option, i) => (

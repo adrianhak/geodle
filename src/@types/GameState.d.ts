@@ -14,4 +14,5 @@ export interface GameStateContextType {
   setAnswer: (answer: string) => void;
   saveGame: (game: IGameState) => void;
   addGuess: (guess: Guess) => void;
+  resetToday: () => void;
 }

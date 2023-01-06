@@ -212,6 +212,11 @@ const Game = () => {
               isPendingGuess={isPendingGuess}
             />
           )}
+          {process.env.REACT_APP_DEVTOOLS && (
+            <button className='bg-red-500 p-1' onClick={gameStateContext.resetToday}>
+              Reset
+            </button>
+          )}
         </div>
       </div>
     </div>

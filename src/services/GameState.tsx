@@ -12,6 +12,7 @@ export const InitialGameStateContext: GameStateContextType = {
   setAnswer: (answer: string) => undefined,
   addGuess: (guess: Guess) => undefined,
   saveGame: (game: IGameState) => undefined,
+  resetToday: () => undefined,
 };
 
 const GameStateContext = createContext<GameStateContextType>(InitialGameStateContext);
@@ -25,6 +26,7 @@ export const GameStateProvider = (props: any) => {
     setAnswer: props.setAnswer || InitialGameStateContext.setAnswer,
     addGuess: props.addGuess || InitialGameStateContext.addGuess,
     saveGame: props.saveGame || InitialGameStateContext.saveGame,
+    resetToday: props.resetToday || InitialGameStateContext.resetToday,
   };
 
   return <GameStateContext.Provider value={value}>{props.children}</GameStateContext.Provider>;
