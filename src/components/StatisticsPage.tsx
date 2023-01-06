@@ -53,15 +53,17 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const setStatsTab = () => pageContext.setTab(0);
   const setHistoryTab = () => pageContext.setTab(1);
 
-  const fetchGameHistory = () => {
+  const fetchGameHistory = (offset?: number) => {
     ResultsService.resultsList(
       10,
-      history.offset,
+      offset === undefined ? history.offset : offset,
       gameStateContext.currentGame?.gameRound.answer
     ).then((results) => {
-      setGameHistory((prevState) => [...prevState, ...results.results]);
+      setGameHistory((prevState) =>
+        offset === undefined ? [...prevState, ...results.results] : results.results
+      );
       setHistory((historyOffset) => ({
-        offset: historyOffset.offset + 10,
+        offset: offset === undefined ? historyOffset.offset + 10 : historyOffset.offset,
         total: results.count,
       }));
     });
@@ -91,7 +93,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   // Re-fetch stats for today's round when completed
   useEffect(() => {
     if (gameStateContext.currentGame?.isCompleted) {
-      fetchGameHistory();
+      fetchGameHistory(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStateContext.currentGame?.isCompleted]);
