@@ -134,6 +134,10 @@ const Game = () => {
 
   // Guess has been made and result shown to user, fetch next sat image or end game (callback for countup end)
   const guessDone = () => {
+    // If not expecting guess response, do nothing (happens on page reload)
+    if (isPendingGuess === false) {
+      return;
+    }
     setIsPendingGuess(false);
     if (currentGame?.isCompleted) {
       const lastGuess = currentGame?.guesses[currentGame.guesses.length - 1];
