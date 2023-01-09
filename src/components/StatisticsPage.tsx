@@ -63,7 +63,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
         offset === undefined ? [...prevState, ...results.results] : results.results
       );
       setHistory((historyOffset) => ({
-        offset: offset === undefined ? historyOffset.offset + 10 : historyOffset.offset,
+        offset: historyOffset.offset + 10,
         total: results.count,
       }));
     });
@@ -107,17 +107,18 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const getLongestStreak = (): number => {
     if (!prevGames) return 0;
     let streak = 0;
+    let maxStreak = 0;
     prevGames
       .sort((g1, g2) => g2.gameRound.id - g1.gameRound.id)
-      .filter((game) => game.guesses.some((guess) => guess.distance === 0))
-      .forEach((_, i) => {
-        if (i === 0) {
-          streak++;
-        } else if (i === streak) {
-          streak++;
+      .forEach((game, i) => {
+        if (!game.guesses.some((g) => g.distance === 0)) {
+          streak = 0;
+        } else {
+          streak += 1;
+          maxStreak = streak >= maxStreak ? streak : maxStreak;
         }
       });
-    return streak;
+    return maxStreak;
   };
 
   const getStreak = () => {
