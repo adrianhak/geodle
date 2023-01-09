@@ -19,7 +19,7 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-  BASE: process.env.REACT_APP_SERVER_ENDPOINT || 'http://localhost:8000',
+  BASE: (process.env.REACT_APP_SERVER_ENDPOINT || 'http://localhost:8000') + '/',
   VERSION: '1',
   WITH_CREDENTIALS: false,
   CREDENTIALS: 'include',
