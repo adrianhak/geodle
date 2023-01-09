@@ -12,7 +12,7 @@ export const GameServerProvider = (props: any) => {
   const getSatImage = async (guessCount: number, show_labels: boolean): Promise<string> => {
     setIsLoading(true);
     const res = (
-      await axios.get((process.env.REACT_APP_SERVER_ENDPOINT + 'fetchimage/') as string, {
+      await axios.get((process.env.REACT_APP_SERVER_ENDPOINT + '/fetchimage/') as string, {
         params: { n: guessCount, ...(show_labels ? { l: show_labels } : {}) },
         responseType: 'blob',
       })
