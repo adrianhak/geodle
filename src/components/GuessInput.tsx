@@ -1,8 +1,7 @@
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import AutoSuggest from 'react-autosuggest';
 import { ILocation } from '../@types/Location';
 import { locations } from '../locations';
-import { useGameState } from '../services/GameState';
 import { getCountryEmoji } from '../util/getCountryEmoji';
 
 interface GuessInputProps {
@@ -19,8 +18,6 @@ export const GuessInput = ({
   isPendingGuess,
 }: GuessInputProps) => {
   const [suggestions, setSuggestions] = useState<ILocation[]>([]);
-
-  const { currentGame } = useGameState();
 
   const onValueChange = (event: any, { newValue }: any) => {
     setCurrentGuess(newValue);
@@ -42,7 +39,7 @@ export const GuessInput = ({
   const getSuggestionValue = (suggestion: ILocation) => suggestion.name;
 
   const renderSuggestion = (suggestion: ILocation) => (
-    <div className='bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-400 text-left cursor-pointer p-1 hover:bg-neutral-800'>
+    <div className='bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-400 text-left cursor-pointer p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800'>
       {getCountryEmoji(suggestion.code) + ' ' + suggestion.name}
     </div>
   );
