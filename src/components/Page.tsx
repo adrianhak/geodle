@@ -24,7 +24,7 @@ const modalStyles = {
 export const Page = (props: PageProps) => {
   return (
     <Modal
-      className='h-4/5 w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 z-50 items-center justify-center text-black dark:text-white'
+      className='h-5/6 w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 z-50 items-center justify-center text-black dark:text-white'
       style={modalStyles}
       isOpen={props.showPage}
       onRequestClose={props.closePage}
