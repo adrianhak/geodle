@@ -99,10 +99,11 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   }, [gameStateContext.currentGame?.isCompleted]);
 
   const playCount = prevGames?.length;
-  const winRate = prevGames
-    ? prevGames?.filter((game) => game?.guesses?.some((guess) => guess.distance === 0)).length /
-      prevGames?.length
-    : 0;
+  const winRate =
+    prevGames && prevGames.length > 0
+      ? prevGames?.filter((game) => game?.guesses?.some((guess) => guess.distance === 0)).length /
+        prevGames?.length
+      : 0;
 
   const getLongestStreak = (): number => {
     if (!prevGames) return 0;
