@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useEffect, FormEvent, useRef, useCallback } from 'react';
 import { Pagination } from 'swiper';
 import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
 import type { Swiper } from 'swiper';
@@ -124,7 +124,6 @@ const Game = () => {
         setGame.current(gameRound);
         localStorage.setItem('satImages', '[]');
         setSatImages([]);
-        getSatImage();
       } else {
         // TODO: Add error handling
       }
