@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Geodle — The ultimate geography challenge</title>
     <meta name="title" content="Geodle — The ultimate geography challenge" />
@@ -17,6 +13,14 @@
       name="description"
       content="Geodle is a daily geography quiz in a familiar format. Can you guess today's location given only a few satellite images?" />
 
+    <!-- CSP, allow for Cloudflare analytics-->
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="img-src 'self' *.adrianh.net data:; child-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' *.adrianh.net https://cloudflareinsights.com;" />
+
+    <% } %>
+    <meta name="referrer" content="no-referrer" />
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Geodle — The ultimate geography challenge" />
