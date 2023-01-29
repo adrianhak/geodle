@@ -8,7 +8,7 @@ export const InitialGameStateContext: GameStateContextType = {
   prevGames: null,
   currentGame: null,
   maxGuesses: 6,
-  setGame: (gameRound: GameRound) => undefined,
+  setGame: (gameRound: GameRound | null) => undefined,
   setAnswer: (answer: string) => undefined,
   addGuess: (guess: Guess) => undefined,
   saveGame: (game: IGameState) => undefined,

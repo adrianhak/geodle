@@ -10,7 +10,7 @@ export interface GameStateContextType {
   prevGames: IGameState[] | null;
   currentGame: IGameState | null;
   maxGuesses: number;
-  setGame: (gameRound: GameRound) => void;
+  setGame: (gameRound: GameRound | null) => void;
   setAnswer: (answer: string) => void;
   saveGame: (game: IGameState) => void;
   addGuess: (guess: Guess) => void;

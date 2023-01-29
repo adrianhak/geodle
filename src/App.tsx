@@ -15,7 +15,11 @@ function App() {
   const [currentGame, setCurrentGame] = useState<IGameState | null>(null);
 
   // Add a new game round to the game state
-  const setGame = (gameRound: GameRound) => {
+  const setGame = (gameRound: GameRound | null) => {
+    if (gameRound === null) {
+      setCurrentGame(null);
+      return;
+    }
     const fullGameRound: FullGameRound = { id: gameRound.id, date: gameRound.date, answer: '' };
     setCurrentGame({ gameRound: fullGameRound, guesses: [], isCompleted: false });
   };
