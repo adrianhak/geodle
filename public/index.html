@@ -37,11 +37,13 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
+    <% if (process.env.NODE_ENV === 'production') { %>
     <!-- Cloudflare Web Analytics -->
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
       data-cf-beacon='{"token": "%REACT_APP_ANALYTICS_ID%"}'></script>
     <!-- End Cloudflare Web Analytics -->
+    <% } %>
   </body>
 </html>
