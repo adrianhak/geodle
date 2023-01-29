@@ -33,9 +33,12 @@ export const GuessInput = ({
     const inputValue = value.trim().toLowerCase();
     return inputValue.length === 0
       ? []
-      : locations.filter(
-          (location) => location.name.toLowerCase().slice(0, inputValue.length) === inputValue
-        );
+      : locations
+          .filter((location) => location.name.toLowerCase().includes(inputValue))
+          .sort(
+            (a, b) =>
+              a.name.toLowerCase().indexOf(inputValue) - b.name.toLowerCase().indexOf(inputValue)
+          );
   };
 
   const getSuggestionValue = (suggestion: ILocation) => suggestion.name;
