@@ -47,7 +47,7 @@ export const InfoPage = (props: InfoPageProps) => {
         </div>
         <p className=' text-neutral-400 text-sm'>
           Made by{' '}
-          <a className='underline' href='https://adrianh.net'>
+          <a className='underline' href='https://github.com/adrianhak'>
             Adrian Håkansson
           </a>
           <br /> Inspired by{' '}
