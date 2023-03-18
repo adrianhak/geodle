@@ -12,7 +12,7 @@ document.title = i18n.t('meta.title');
 document.querySelector('meta[name="description"]')?.setAttribute('content', i18n.t('meta.desc'));
 root.render(<App />);
 
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.unregister();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
