@@ -33,26 +33,24 @@ export const InfoPage = (props: InfoPageProps) => {
           <p className='text-sm'>{t('info.example_desc_4')}</p>
           <p className='text-sm mt-2'>{t('info.instruction')}</p>
         </div>
-        <p className=' text-neutral-400 text-sm'>
+        <p className=' text-neutral-400 text-xs sm:text-sm'>
           {t('info.made_by')}{' '}
           <a className='underline' href='https://github.com/adrianhak'>
             Adrian Håkansson
           </a>
           <br /> {t('info.credits')}{' '}
-          <a className='underline' href='https://twitter.com/powerlanguish'>
-            Josh Wardle&apos;s
-          </a>{' '}
           <a className='underline' href='https://www.nytimes.com/games/wordle/index.html'>
             Wordle
           </a>{' '}
           and{' '}
-          <a className='underline' href='https://twitter.com/teuteuf'>
-            teuteuf&apos;s
-          </a>{' '}
           <a className='underline' href='https://worldle.teuteuf.fr'>
             Worldle
           </a>
-          .
+          <br />
+          {t('info.here_credits')}{' '}
+          <a className='underline' href='https://here.com'>
+            HERE
+          </a>
         </p>
       </div>
     </Page>

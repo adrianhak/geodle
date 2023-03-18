@@ -23,7 +23,8 @@
     "example_desc_4": "Rätt! Kanada var svaret.",
     "instruction": "Genom att använda ledtrådar i bilderna och de angivna avstånden är din utmaning att lista ut platsen på så få försök som möjligt.",
     "made_by": "Gjord av",
-    "credits": "Inspirerad av"
+    "credits": "Inspirerad av",
+    "here_credits": "Satellitbilder tillhandahålls av"
   },
   "support": {
     "title": "Supporta Geodle",
