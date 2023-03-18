@@ -23,7 +23,8 @@
     "example_desc_4": "Correct! Canada was the right answer.",
     "instruction": "Using clues given in the images and the distances from your guesses, your challenge is to figure out the location in as few tries as possible.",
     "made_by": "Made by",
-    "credits": "Inspired by"
+    "credits": "Inspired by",
+    "here_credits": "Satellite imagery provided by"
   },
   "support": {
     "title": "Support Geodle",
