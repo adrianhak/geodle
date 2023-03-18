@@ -1,4 +1,5 @@
 import React, { FormEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AutoSuggest from 'react-autosuggest';
 import { ILocation } from '../@types/Location';
 import { locations } from '../locations';
@@ -19,6 +20,7 @@ export const GuessInput = ({
   isPendingGuess,
   isSendingGuess,
 }: GuessInputProps) => {
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState<ILocation[]>([]);
 
   const onValueChange = (event: any, { newValue }: any) => {
@@ -34,18 +36,27 @@ export const GuessInput = ({
     return inputValue.length === 0
       ? []
       : locations
-          .filter((location) => location.name.toLowerCase().includes(inputValue))
+          .filter((location) =>
+            t('locations.' + location.code)
+              .toLowerCase()
+              .includes(inputValue)
+          )
           .sort(
             (a, b) =>
-              a.name.toLowerCase().indexOf(inputValue) - b.name.toLowerCase().indexOf(inputValue)
+              t('locations.' + a.code)
+                .toLowerCase()
+                .indexOf(inputValue) -
+              t('locations.' + b.code)
+                .toLowerCase()
+                .indexOf(inputValue)
           );
   };
 
-  const getSuggestionValue = (suggestion: ILocation) => suggestion.name;
+  const getSuggestionValue = (suggestion: ILocation) => t('locations.' + suggestion.code);
 
   const renderSuggestion = (suggestion: ILocation) => (
     <div className='bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-400 text-left cursor-pointer p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800'>
-      {getCountryEmoji(suggestion.code) + ' ' + suggestion.name}
+      {getCountryEmoji(suggestion.code) + ' ' + t('locations.' + suggestion.code)}
     </div>
   );
 
@@ -58,7 +69,7 @@ export const GuessInput = ({
   };
 
   const inputProps = {
-    placeholder: 'Enter a location',
+    placeholder: t('guess_input'),
     value: currentGuess,
     onChange: onValueChange,
     disabled: isPendingGuess,
@@ -111,7 +122,7 @@ export const GuessInput = ({
             <span className='sr-only'>Loading...</span>
           </div>
         ) : (
-          <>GUESS</>
+          <>{t('guess_button')}</>
         )}
       </button>
     </form>

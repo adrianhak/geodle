@@ -1,4 +1,5 @@
 import React, { ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { settingValues } from '../contexts/SettingsContext';
 
 interface SettingItemProps {
@@ -20,6 +21,7 @@ export const SettingItem = ({
   showAsToggle,
   setValue,
 }: SettingItemProps) => {
+  const { t } = useTranslation();
   const onUpdateSetting = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (e.target instanceof HTMLInputElement) {
       const target = e.target as HTMLInputElement;
@@ -49,7 +51,7 @@ export const SettingItem = ({
       onChange={onUpdateSetting}
       defaultValue={currentValue as string}>
       {options.map((option, i) => (
-        <option key={i} value={option as string} label={option as string} />
+        <option key={i} value={option as string} label={t(option as string) as string} />
       ))}
     </select>
   );

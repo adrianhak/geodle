@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Units, useSettingsContext } from '../contexts/SettingsContext';
 
 interface AvgDistanceProps {
@@ -7,6 +8,7 @@ interface AvgDistanceProps {
 
 export const AvgDistance = ({ distance }: AvgDistanceProps) => {
   const { settings } = useSettingsContext();
+  const { t } = useTranslation();
 
   const localizeDistance = (distance: number) => {
     switch (settings.units) {
@@ -21,7 +23,7 @@ export const AvgDistance = ({ distance }: AvgDistanceProps) => {
 
   return (
     <div className='text-center'>
-      <div className='font-semibold text-sm'>Average guess distance</div>
+      <div className='font-semibold text-sm'>{t('stats.avg_distance')}</div>
       <div className='font-bold text-xl'> {distance ? localizeDistance(distance) : '-'}</div>
     </div>
   );

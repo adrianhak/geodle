@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lang, Theme, Units, useSettingsContext } from '../contexts/SettingsContext';
 import { SettingsBuilder } from '../util/settingsBuilder';
 import { Page } from './Page';
@@ -11,22 +12,23 @@ interface SettingsPageProps {
 
 export const SettingsPage = (props: SettingsPageProps) => {
   const { settings, setLanguage, setUnits, setTheme, setShowLabels } = useSettingsContext();
+  const { t } = useTranslation();
 
   const settingsBuilder = new SettingsBuilder();
 
   /* eslint-disable */
   settingsBuilder
-    .addSection('General')
-      .addItem<Lang>('Language', Object.values(Lang), settings.language, setLanguage)
-      .addItem<Units>('Unit of distance',Object.values(Units),settings.units,setUnits)
-      .addItem<Theme>('Theme', Object.values(Theme), settings.theme, setTheme);
+    .addSection(t('settings.general_title'))
+      .addItem<Lang>(t('settings.lang'), Object.values(Lang), settings.language, setLanguage)
+      .addItem<Units>(t('settings.unit'),Object.values(Units),settings.units,setUnits)
+      .addItem<Theme>(t('settings.theme'), Object.values(Theme), settings.theme, setTheme);
   settingsBuilder
-    .addSection('Difficulty modifiers')
-      .addItem<boolean>('Show labels',[true, false],settings.showLabels,setShowLabels,'When enabled, images include names of roads, rivers etc')
+    .addSection(t('settings.difficulty_mod_title'))
+      .addItem<boolean>(t('settings.show_labels'),[true, false],settings.showLabels,setShowLabels,t('settings.show_labels_desc') as string)
       .isToggle();
   /* eslint-enable */
   return (
-    <Page showPage={props.isOpen} closePage={props.close} pageTitle='Settings'>
+    <Page showPage={props.isOpen} closePage={props.close} pageTitle={t('settings.title')}>
       <div className='flex flex-col justify-items-stretch w-11/12 mx-auto'>
         {settingsBuilder.build().map((section, i) => (
           <>

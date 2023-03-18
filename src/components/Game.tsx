@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FormEvent, useRef, useCallback } from 'react';
 import { Pagination } from 'swiper';
 import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
+import { useTranslation } from 'react-i18next';
 import type { Swiper } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -28,6 +29,7 @@ const Game = () => {
   const gameServer = useGameServer();
   const pageContext = usePageContext();
   const { settings } = useSettingsContext();
+  const { t } = useTranslation();
   const setGame = useRef(gameStateContext.setGame);
   const saveGame = useRef(gameStateContext.saveGame);
   const currentGame = gameStateContext.currentGame;
@@ -51,7 +53,9 @@ const Game = () => {
   // Return location object matching the current guess string, or null if no match, duplicate or max count reached
   const validateGuess = (guess: string): ILocation | null => {
     guess = guess.toLowerCase();
-    const location = locations.find((location) => location.name.toLowerCase() === guess);
+    const location = locations.find(
+      (location) => t('locations.' + location.code).toLowerCase() === guess
+    );
     if (
       !location ||
       gameStateContext.currentGame?.guesses.find((guess) => guess.location === location.code)
@@ -146,7 +150,7 @@ const Game = () => {
       const lastGuess = currentGame?.guesses[currentGame.guesses.length - 1];
       saveGame.current(currentGame);
       if (lastGuess.distance === 0) {
-        toast('Good job!');
+        toast(t('toast_win_message'));
       } else if (lastGuess.game_round?.answer) {
         toast(
           getCountryEmoji(lastGuess.game_round.answer) +
