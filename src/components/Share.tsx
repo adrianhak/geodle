@@ -1,11 +1,13 @@
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useGameState } from '../services/GameState';
 
 export const Share = () => {
   const gameStateContext = useGameState();
+  const { t } = useTranslation();
   const gameState = gameStateContext.currentGame;
   const [momentDiff, setMomentDiff] = useState<number>(
     moment.utc(gameState?.gameRound.date).add(1, 'd').diff(moment.utc())
@@ -51,7 +53,7 @@ export const Share = () => {
   return (
     <div className='flex justify-end'>
       <div className='text-sm text-neutral-700 dark:text-neutral-400 font-bold text-right mr-2'>
-        Next Geodle in{' '}
+        {t('next_geodle')}
         <div className='text-neutral-500 dark:text-neutral-200 font-mono'>
           {moment.utc(momentDiff).format('HH:mm:ss')}
         </div>
@@ -59,7 +61,7 @@ export const Share = () => {
       <button
         onClick={copyResults}
         className='bg-green-700 text-white font-bold tracking-widest px-4 py-1 hover:bg-green-800'>
-        SHARE
+        {t('share')}
       </button>
     </div>
   );

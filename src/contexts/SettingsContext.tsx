@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import i18n from '../i18n';
 
 const { createContext, useContext } = React;
+
+const getEnumKey = (obj: any, value: string) => {
+  const keyIndex = Object.values(obj).indexOf(value);
+
+  return Object.keys(obj)[keyIndex];
+};
 
 export type settingValues = Lang | Units | Theme | boolean;
 export interface SettingOptions {
@@ -8,18 +15,19 @@ export interface SettingOptions {
 }
 
 export enum Lang {
-  English = 'English',
+  en = 'English',
+  sv = 'Svenska',
 }
 
 export enum Units {
-  Metric = 'Metric (km)',
-  Imperial = 'Imperial (mi)',
+  Metric = 'settings.units.metric',
+  Imperial = 'settings.units.imperial',
 }
 
 export enum Theme {
-  System = 'System',
-  Light = 'Light',
-  Dark = 'Dark',
+  System = 'settings.themes.system',
+  Light = 'settings.themes.light',
+  Dark = 'settings.themes.dark',
 }
 
 export interface Settings {
@@ -37,9 +45,22 @@ interface SettingsContextType {
   setShowLabels: (showLabels: boolean) => void;
 }
 
+const setDefaultLang = (): Lang => {
+  const detectedLang = Lang[i18n.language as keyof typeof Lang];
+  console.log(detectedLang);
+  switch (detectedLang) {
+    case Lang.en:
+      return Lang.en;
+    case Lang.sv:
+      return Lang.sv;
+    default:
+      return Lang.en;
+  }
+};
+
 const initialContext = {
   settings: {
-    language: Lang.English,
+    language: setDefaultLang(),
     units: Units.Metric,
     theme: Theme.System,
     showLabels: false,
@@ -104,6 +125,10 @@ export const SettingsContextProvider = (props: any) => {
         .removeEventListener('change', onThemeChange);
     };
   }, [theme]);
+
+  useEffect(() => {
+    i18n.changeLanguage(getEnumKey(Lang, language));
+  }, [language]);
 
   return (
     <SettingsContext.Provider

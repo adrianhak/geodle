@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Calendar, ChevronLeft, ChevronRight } from 'react-feather';
 import Swiper, { Navigation } from 'swiper';
+import { useTranslation } from 'react-i18next';
 import { Swiper as SwiperComponent, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -40,6 +41,7 @@ enum SlideStatus {
 
 export const StatisticsPage = (props: StatisticsPageProps) => {
   const gameStateContext = useGameState();
+  const { t } = useTranslation();
   const prevGames = gameStateContext.prevGames;
   const pageContext = usePageContext();
 
@@ -167,23 +169,23 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
       <div className='flex items-center justify-evenly'>
         <div className='flex flex-col items-center'>
           <span className='text-lg font-bold'>{playCount}</span>
-          <span className='text-xs font-thin uppercase'>Played</span>
+          <span className='text-xs font-thin uppercase'>{t('stats.played')}</span>
         </div>
         <div className='flex flex-col items-center'>
           <span className='text-lg font-bold'>{Math.round(winRate * 100)}</span>
-          <span className='text-xs font-thin uppercase'>Win %</span>
+          <span className='text-xs font-thin uppercase'>{t('stats.win_percent')}</span>
         </div>
         <div className='flex flex-col items-center'>
           <span className='text-lg font-bold'>{getStreak()}</span>
-          <span className='text-xs font-thin uppercase'>Streak</span>
+          <span className='text-xs font-thin uppercase'>{t('stats.streak')}</span>
         </div>
         <div className='flex flex-col items-center'>
           <span className='text-lg font-bold'>{getLongestStreak()}</span>
-          <span className='text-xs font-thin uppercase'>Max Streak</span>
+          <span className='text-xs font-thin uppercase'>{t('stats.max_streak')}</span>
         </div>
       </div>
       <GuessDistribution
-        title='Guess Distribution'
+        title={t('stats.guess_distribution')}
         distribution={guessDistribution}
         maxGuesses={gameStateContext.maxGuesses}
       />
@@ -255,7 +257,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                           locations.find((l) => l.code === game.answer)?.name}
                     </span>
                     <GuessDistribution
-                      title='Guess Distribution (%)'
+                      title={t('stats.guess_distribution') + ' (%)'}
                       distribution={game.distribution}
                       maxGuesses={gameStateContext.maxGuesses}
                       userResult={
@@ -270,7 +272,9 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                       <div className='sm:flex sm:justify-around sm:items-baseline'>
                         <AvgDistance distance={game.avg_distance} />
                         <div>
-                          <div className='font-semibold text-sm mt-4'>Most guessed location</div>
+                          <div className='font-semibold text-sm mt-4'>
+                            {t('stats.history.most_guessed')}
+                          </div>
                           {game?.most_common_location ? (
                             <div className='font-semibold text-base'>
                               {getCountryEmoji(game.most_common_location.location) +
@@ -283,7 +287,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                                 <span className='font-bold'>
                                   {Math.round(game?.most_common_location.share * 100)}%
                                 </span>{' '}
-                                of guesses)
+                                {t('stats.history.most_guessed_percent')})
                               </div>
                             </div>
                           ) : (
@@ -292,7 +296,9 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                         </div>
                       </div>
 
-                      <div className='font-semibold text-base mt-4'>Your guesses</div>
+                      <div className='font-semibold text-base mt-4'>
+                        {t('stats.history.your_guesses')}
+                      </div>
                       {game.locations ? (
                         game.locations.map((location, i) => (
                           <div key={location.id} className='flex w-full items-center text-sm'>
@@ -315,9 +321,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                           </div>
                         ))
                       ) : (
-                        <p className='text-sm text-neutral-400'>
-                          You have not yet played this round
-                        </p>
+                        <p className='text-sm text-neutral-400'>{t('stats.history.not_played')}</p>
                       )}
                     </div>
                   </>
@@ -331,7 +335,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   );
 
   return (
-    <Page pageTitle='Stats' showPage={props.isOpen} closePage={props.close}>
+    <Page pageTitle={t('stats.title')} showPage={props.isOpen} closePage={props.close}>
       <React.Fragment>
         <div className='flex justify-around items-center text-neutral-900 dark:text-neutral-300 mt-4 pb-2 border-b dark:border-neutral-400'>
           <button
@@ -340,7 +344,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
               currentTab === Tab.Stats && 'bg-neutral-200 dark:bg-neutral-800'
             } tracking-wide p-2 px-3 font-semibold uppercase text-xs flex items-center hover:bg-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-100`}>
             <BarChart width={18} className='mr-2' />
-            Overall
+            {t('stats.overall_title')}
           </button>
           <button
             onClick={setHistoryTab}
@@ -348,7 +352,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
               currentTab === Tab.History && 'bg-neutral-200 dark:bg-neutral-800'
             } tracking-wide p-2 px-3 font-semibold uppercase text-xs flex items-center hover:bg-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-100`}>
             <Calendar width={18} className='mr-2' />
-            History
+            {t('stats.history.title')}
           </button>
         </div>
         <div className='h-full overflow-y-auto'>

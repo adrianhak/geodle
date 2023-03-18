@@ -1,4 +1,5 @@
 import React, { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Navbar from './components/Navbar';
 import Game from './components/Game';
 import { GameServerProvider } from './services/GameServer';
@@ -11,6 +12,7 @@ import { FullGameRound, GameRound, Guess } from './api';
 import { SettingsContextProvider } from './contexts/SettingsContext';
 
 function App() {
+  const { t } = useTranslation();
   const [prevGames, setPrevGames] = useState<IGameState[] | null>(null);
   const [currentGame, setCurrentGame] = useState<IGameState | null>(null);
 
@@ -137,9 +139,9 @@ function App() {
             </SettingsContextProvider>
           </PageContextProvider>
           <footer className='mb-3 mt-3 text-xs md:text-sm'>
-            Enjoying Geodle?{' '}
+            {t('enjoying_geodle')}{' '}
             <a href='https://ko-fi.com/adrianhak' className='underline'>
-              Buy me a ☕️
+              {t('buy_me_coffee')}
             </a>
           </footer>
         </div>

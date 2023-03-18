@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CountUp from 'react-countup';
 import { ILocation } from '../@types/Location';
 import { Guess } from '../api';
@@ -24,6 +25,7 @@ export const formatDistance = (distance: number) => {
 
 export const GuessRow = ({ guess, doCount, onCountDone }: GuessRowProps) => {
   const { settings } = useSettingsContext();
+  const { t } = useTranslation();
 
   const [countDone, setCountDone] = useState(false);
 
@@ -47,7 +49,10 @@ export const GuessRow = ({ guess, doCount, onCountDone }: GuessRowProps) => {
           : 'border-neutral-300 dark:border-neutral-600'
       } text-neutral-900 dark:text-neutral-200 text-left px-1 flex justify-between items-center transition-colors duration-500`}>
       <div>
-        {guess && getCountryEmoji(guess.location) + ' ' + findLocation(guess.location)?.name}
+        {guess &&
+          getCountryEmoji(guess.location) +
+            ' ' +
+            t('locations.' + findLocation(guess.location)?.code)}
       </div>
       <div>
         {guess &&
