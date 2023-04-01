@@ -251,10 +251,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                 {game.distribution && (
                   <>
                     <span className='text-xl font-semibold'>
-                      {game?.answer &&
-                        getCountryEmoji(game.answer) +
-                          ' ' +
-                          locations.find((l) => l.code === game.answer)?.name}
+                      {game?.answer && getCountryEmoji(game.answer) + t('locations.' + game.answer)}
                     </span>
                     <GuessDistribution
                       title={t('stats.guess_distribution') + ' (%)'}
@@ -279,9 +276,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                             <div className='font-semibold text-base'>
                               {getCountryEmoji(game.most_common_location.location) +
                                 ' ' +
-                                locations.find(
-                                  (g) => g.code === game.most_common_location?.location
-                                )?.name}
+                                t('locations.' + game.most_common_location?.location)}
                               <div className='text-xs font-semibold text-neutral-400'>
                                 (
                                 <span className='font-bold'>
