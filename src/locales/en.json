@@ -65,9 +65,9 @@
     },
     "difficulty_mod_title": "Difficulty Modifiers",
     "show_labels": "Show labels",
-    "show_labels_desc": "When enabled, images may include names of roads, rivers etc",
-
-    "locations": {
+    "show_labels_desc": "When enabled, images may include names of roads, rivers etc"
+  },
+  "locations": {
       "AF": "Afghanistan",
       "AL": "Albania",
       "DZ": "Algeria",
@@ -308,4 +308,3 @@
       "ZW": "Zimbabwe"
     }
   }
-}
