@@ -192,7 +192,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
         distribution={guessDistribution}
         maxGuesses={gameStateContext.maxGuesses}
       />
-      <div className='mt-2'>
+      <div className='m-auto mt-4 w-3/4 shadow-md bg-neutral-50 dark:bg-neutral-800 p-2 rounded-md'>
         <AvgDistance distance={getAvgDistance()} />
       </div>
     </div>
