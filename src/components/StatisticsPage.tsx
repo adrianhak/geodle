@@ -51,16 +51,19 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
   const [history, setHistory] = useState<HistoryMetadata>({ offset: 0, total: 0 });
   const [gameHistory, setGameHistory] = useState<ExtendedGameRound[]>([]);
   const [slideStatus, setSlideStatus] = useState<SlideStatus>(SlideStatus.First);
+  const [pendingFetch, setPendingFetch] = useState<boolean>(true);
 
   const setStatsTab = () => pageContext.setTab(0);
   const setHistoryTab = () => pageContext.setTab(1);
 
   const fetchGameHistory = (offset?: number) => {
+    setPendingFetch(true);
     ResultsService.resultsList(
       10,
       offset === undefined ? history.offset : offset,
       gameStateContext.currentGame?.gameRound.answer
     ).then((results) => {
+      setPendingFetch(false);
       setGameHistory((prevState) =>
         offset === undefined ? [...prevState, ...results.results] : results.results
       );
@@ -239,91 +242,100 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
           nextEl: '.next',
         }}>
         <div className='mt-4 flex justify-center text-center'>
-          {gameHistory?.map((game) => (
-            <SwiperSlide key={game.id}>
-              <div className='flex flex-col justify-center text-center'>
-                <div>
-                  <span className='text-sm font-semibold text-neutral-500'>Geodle #{game.id}</span>
-                  <span className='text-xs font-semibold text-neutral-500 flex justify-center'>
-                    {moment.utc(game.date).toDate().toLocaleDateString()}
-                  </span>
-                </div>
-                {game.distribution && (
-                  <>
-                    <span className='text-xl font-semibold'>
-                      {game?.answer && getCountryEmoji(game.answer) + t('locations.' + game.answer)}
-                    </span>
-                    <GuessDistribution
-                      title={t('stats.guess_distribution') + ' (%)'}
-                      distribution={game.distribution}
-                      maxGuesses={gameStateContext.maxGuesses}
-                      userResult={
-                        prevGames?.find(
-                          (g) =>
-                            g.gameRound.id === game.id &&
-                            g.guesses.some((guess) => guess.distance === 0)
-                        )?.guesses.length
-                      }
-                    />
+          {pendingFetch
+            ? '' /* TODO: Create skeleton loading component */
+            : gameHistory?.map((game) => (
+                <SwiperSlide key={game.id}>
+                  <div className='flex flex-col justify-center text-center'>
                     <div>
-                      <div className='sm:flex sm:justify-around sm:items-baseline'>
-                        <AvgDistance distance={game.avg_distance} />
+                      <span className='text-sm font-semibold text-neutral-500'>
+                        Geodle #{game.id}
+                      </span>
+                      <span className='text-xs font-semibold text-neutral-500 flex justify-center'>
+                        {moment.utc(game.date).toDate().toLocaleDateString()}
+                      </span>
+                    </div>
+                    {game.distribution && (
+                      <>
+                        <span className='text-xl font-semibold'>
+                          {game?.answer &&
+                            getCountryEmoji(game.answer) + ' ' + t('locations.' + game.answer)}
+                        </span>
+                        <GuessDistribution
+                          title={t('stats.guess_distribution') + ' (%)'}
+                          distribution={game.distribution}
+                          maxGuesses={gameStateContext.maxGuesses}
+                          userResult={
+                            prevGames?.find(
+                              (g) =>
+                                g.gameRound.id === game.id &&
+                                g.guesses.some((guess) => guess.distance === 0)
+                            )?.guesses.length
+                          }
+                        />
                         <div>
-                          <div className='font-semibold text-sm mt-4'>
-                            {t('stats.history.most_guessed')}
-                          </div>
-                          {game?.most_common_location ? (
-                            <div className='font-semibold text-base'>
-                              {getCountryEmoji(game.most_common_location.location) +
-                                ' ' +
-                                t('locations.' + game.most_common_location?.location)}
-                              <div className='text-xs font-semibold text-neutral-400'>
-                                (
-                                <span className='font-bold'>
-                                  {Math.round(game?.most_common_location.share * 100)}%
-                                </span>{' '}
-                                {t('stats.history.most_guessed_percent')})
-                              </div>
+                          <div className='sm:flex sm:justify-around sm:items-stretch mt-5'>
+                            <div className='w-3/4 m-auto sm:m-0 sm:w-1/3 shadow-md bg-neutral-50 dark:bg-neutral-800 p-2 rounded-md mb-6 sm:mb-0'>
+                              <AvgDistance distance={game.avg_distance} />
                             </div>
+                            <div className='w-3/4 m-auto sm:m-0 sm:w-1/3 shadow-md bg-neutral-50 dark:bg-neutral-800 p-2 rounded-md'>
+                              <div className='font-semibold text-sm'>
+                                {t('stats.history.most_guessed')}
+                              </div>
+                              {game?.most_common_location ? (
+                                <div className='font-semibold text-base'>
+                                  {getCountryEmoji(game.most_common_location.location) +
+                                    ' ' +
+                                    t('locations.' + game.most_common_location?.location)}
+                                  <div className='text-xs font-semibold text-neutral-400'>
+                                    (
+                                    <span className='font-bold'>
+                                      {Math.round(game?.most_common_location.share * 100)}%
+                                    </span>{' '}
+                                    {t('stats.history.most_guessed_percent')})
+                                  </div>
+                                </div>
+                              ) : (
+                                '—'
+                              )}
+                            </div>
+                          </div>
+
+                          <div className='font-semibold text-base mt-4'>
+                            {t('stats.history.your_guesses')}
+                          </div>
+                          {game.locations ? (
+                            game.locations.map((location, i) => (
+                              <div key={location.id} className='flex w-full items-center text-sm'>
+                                <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
+                                  📍
+                                  <a
+                                    className='underline dark:text-white'
+                                    href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
+                                    <span className='font-mono'>#{i + 1}</span>
+                                  </a>
+                                </div>
+                                <div className='flex-grow'>
+                                  <GuessRow
+                                    guess={
+                                      prevGames?.find((g) => g.gameRound.id === game.id)?.guesses[i]
+                                    }
+                                    doCount={false}
+                                  />
+                                </div>
+                              </div>
+                            ))
                           ) : (
-                            '—'
+                            <p className='text-sm text-neutral-400'>
+                              {t('stats.history.not_played')}
+                            </p>
                           )}
                         </div>
-                      </div>
-
-                      <div className='font-semibold text-base mt-4'>
-                        {t('stats.history.your_guesses')}
-                      </div>
-                      {game.locations ? (
-                        game.locations.map((location, i) => (
-                          <div key={location.id} className='flex w-full items-center text-sm'>
-                            <div className='border-2 border-neutral-300 h-8 flex items-center px-1 mt-2 dark:border-neutral-600 text-neutral-900 mr-2'>
-                              📍
-                              <a
-                                className='underline dark:text-white'
-                                href={`https://maps.google.com/maps?q=${location.lat},${location.long}`}>
-                                <span className='font-mono'>#{i + 1}</span>
-                              </a>
-                            </div>
-                            <div className='flex-grow'>
-                              <GuessRow
-                                guess={
-                                  prevGames?.find((g) => g.gameRound.id === game.id)?.guesses[i]
-                                }
-                                doCount={false}
-                              />
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className='text-sm text-neutral-400'>{t('stats.history.not_played')}</p>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </SwiperSlide>
-          ))}
+                      </>
+                    )}
+                  </div>
+                </SwiperSlide>
+              ))}
         </div>
       </SwiperComponent>
     </>
