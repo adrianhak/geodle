@@ -17,6 +17,7 @@ import { ExtendedGameRound, ResultsService } from '../api';
 import moment from 'moment';
 import { AvgDistance } from './AvgDistance';
 import { usePageContext } from '../contexts/PageContext';
+import { StatisticsSkeleton } from './StatisticsSkeleton';
 
 interface StatisticsPageProps {
   isOpen: boolean;
@@ -242,10 +243,14 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
           nextEl: '.next',
         }}>
         <div className='mt-4 flex justify-center text-center'>
-          {pendingFetch
-            ? '' /* TODO: Create skeleton loading component */
-            : gameHistory?.map((game) => (
-                <SwiperSlide key={game.id}>
+          {gameHistory?.length === 0 ? (
+            <StatisticsSkeleton />
+          ) : (
+            gameHistory?.map((game) => (
+              <SwiperSlide key={game.id}>
+                {pendingFetch ? (
+                  <StatisticsSkeleton />
+                ) : (
                   <div className='flex flex-col justify-center text-center'>
                     <div>
                       <span className='text-sm font-semibold text-neutral-500'>
@@ -334,8 +339,10 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
                       </>
                     )}
                   </div>
-                </SwiperSlide>
-              ))}
+                )}
+              </SwiperSlide>
+            ))
+          )}
         </div>
       </SwiperComponent>
     </>
