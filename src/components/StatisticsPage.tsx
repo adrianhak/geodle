@@ -248,7 +248,7 @@ export const StatisticsPage = (props: StatisticsPageProps) => {
           ) : (
             gameHistory?.map((game) => (
               <SwiperSlide key={game.id}>
-                {pendingFetch ? (
+                {pendingFetch && gameHistory[gameHistory.length - 1] === game ? (
                   <StatisticsSkeleton />
                 ) : (
                   <div className='flex flex-col justify-center text-center'>
