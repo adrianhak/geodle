@@ -12,3 +12,9 @@ body,
   font-family: 'Noto Serif Display';
   src: url('./fonts/NotoSerifDisplay-Bold.ttf') format('truetype');
 }
+
+@layer components {
+  .skeleton-bar {
+    @apply rounded-sm bg-gray-200 dark:bg-gray-700;
+  }
+}
