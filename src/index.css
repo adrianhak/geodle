@@ -17,4 +17,12 @@ body,
   .skeleton-bar {
     @apply rounded-sm bg-gray-200 dark:bg-gray-700;
   }
+
+  .xmas-text > *:nth-child(even) {
+    @apply text-red-700;
+  }
+
+  .xmas-text > *:nth-child(odd) {
+    @apply text-emerald-700;
+  }
 }
